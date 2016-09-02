@@ -138,7 +138,45 @@ local picks = {3456, 9594, 9596, 9598}
 local closeddoorsids = {1628, 1629, 1631, 1632, 1638, 1640, 1642, 1644, 1646, 1648, 1650, 1651, 1653, 1654, 1656, 1658, 1660, 1662, 1664, 1666, 1668, 1669, 1671, 1672, 1674, 1676, 1678, 1680, 1682, 1683, 1685, 1687, 1689, 1691, 1692, 1694, 1696, 1698, 4912, 4913, 5006, 5007, 5082, 5084, 5097, 5098, 5100, 5102, 5104, 5106, 5107, 5109, 5111, 5113, 5115, 5116, 5118, 5120, 5122, 5124, 5125, 5127, 5129, 5131, 5133, 5134, 5136, 5137, 5139, 5140, 5142, 5143, 5277, 5278, 5280, 5281, 5282, 5285, 5287, 5289, 5291, 5293, 5302, 5303, 5514, 5516, 5732, 5735, 5745, 5749, 6191, 6192, 6194, 6195, 6197, 6199, 6201, 6203, 6205, 6207, 6248, 6249, 6251, 6252, 6254, 6258, 6260, 6262, 6264, 6435, 6436, 6439, 6440, 6443, 6444, 6449, 6450, 6453, 6454, 6457, 6458, 6461, 6462, 6465, 6466, 6469, 6470, 6788, 6789, 6891, 6892, 6894, 6896, 6898, 6900, 6901, 6903, 6905, 6907, 7027, 7028, 7033, 7034, 7036, 7038, 7040, 7042, 7043, 7045, 7047, 7049, 7051, 7052, 7711, 7712, 7714, 7715, 7717, 7719, 7721, 7723, 7725, 7727, 7868, 7941, 8249, 8250, 8252, 8253, 8255, 8257, 8258, 8261, 8263, 8265, 8351, 8352, 8354, 8355, 8357, 8359, 8361, 8363, 8365, 8367, 9347, 9348, 9351, 9352, 9354, 9355, 9357, 9359, 9361, 9363, 9365, 9367, 9551, 9552, 9554, 9556, 9558, 9560, 9561, 9563, 9565, 9567, 9571, 9572, 9858, 9859, 9863, 9865, 9867, 9868, 9872, 9874, 10147, 10149, 10151, 10153, 10155, 10157, 10520, 10521, 11232, 11233, 11237, 11239, 11241, 11242, 11246, 11248, 11705, 11714, 17560, 17561, 17563, 17565, 17567, 17569, 17570, 17572, 17574, 17576, 17700, 17701, 17703, 17705, 17707, 17709, 17710, 17712, 17714, 17716, 20443, 20444, 20446, 20448, 20450, 20452, 20453, 20455, 20457, 20459}
 local openeddoorsids = {1630, 1633, 1639, 1641, 1643, 1645, 1647, 1649, 1652, 1655, 1657, 1659, 1661, 1663, 1665, 1667, 1670, 1673, 1675, 1677, 1679, 1681, 1684, 1686, 1688, 1690, 1693, 1695, 1697, 1699, 2178, 2180, 4911, 4914, 5083, 5085, 5099, 5101, 5103, 5105, 5108, 5110, 5112, 5114, 5117, 5117, 5119, 5121, 5123, 5126, 5128, 5130, 5132, 5135, 5138, 5141, 5144, 5279, 5282, 5284, 5286, 5288, 5290, 5292, 5294, 5515, 5734, 5737, 5746, 5748, 6193, 6196, 6198, 6200, 6202, 6204, 6206, 6208, 6250, 6253, 6255, 6257, 6259, 6261, 6263, 6265, 6893, 6895, 6897, 6899, 6902, 6904, 6906, 6908, 7035, 7037, 7039, 7041, 7044, 7046, 7048, 7050, 7713, 7716, 7718, 7720, 7722, 7724, 7726, 7728, 7869, 8251, 8254, 8256, 8258, 8260, 8262, 8264, 8266, 8353, 8356, 8358, 8360, 8362, 8364, 8366, 8368, 9353, 9356, 9358, 9360, 9362, 9364, 9366, 9368, 9553, 9555, 9557, 9559, 9562, 9564, 9566, 9568, 9860, 9864, 9866, 9869, 9873, 9875, 11234, 11238, 11240, 11243, 11247, 11249, 11708, 11716, 17562, 17564, 17566, 17568, 17571, 17573, 17575, 17577, 17702, 17704, 17706, 17708, 17711, 17713, 17715, 17717, 20445, 20447, 20449, 20451, 20454, 20456, 20458, 20460}
 
+local cityAreas = {
+   {1, "thais", 32369, 32241, 100},
+   {2, "carlin", 32343, 31791, 60},
+   {3, "kazordoon", 32629, 31925, 60},
+   {3, "kazordoon", 32826, 31762, 15},
+   {4, "ab'dendriel", 32681, 31637, 70},
+   {5, "edron", 33205, 31819, 60},
+   {6, "darashia", 33238, 32435, 60},
+   {7, "venore", 32957, 32076, 100},
+   {8, "ankrahmun", 33158, 32829, 100},
+   {9, "port hope", 32623, 32763, 60},
+   {10, "liberty bay", 32317, 32826, 80},
+   {11, "svargrond", 32273, 31149, 80},
+   {12, "yalahar", 32802, 31206, 80},
+   {13, "travora", 32067, 32354, 20},
+   {14, "farmine", 33023, 31453, 60},
+   {15, "gray beach", 33447, 31323, 30},
+   {16, "roshamuul", 33553, 32379, 50},
+   {17, "rathleton", 33627, 31913, 50}
+}
+
 -- LUA FUNCTIONS
+
+-- @name	currentcity
+-- @desc.   Returns id and name of the city in which you are currently.
+-- @returns string
+
+function currentcity()
+   for _, area in ipairs(cityAreas) do
+		if #area == 5 then
+			local id, city, x, y, ray = unpack(area)
+
+			if math.abs($posx - x) < ray and math.abs($posy - y) < ray then
+				return id, city
+			end
+		end
+	end
+   	return 0, ''
+end
 
 function printf(str, ...)
 	return print(sprintf(str, ...))
@@ -1558,7 +1596,7 @@ end
 -- @returns creature
 
 function findplayersonspellrange(spelltype,direction)
-	findcreaturesonspellrange(spelltype,direction,'pf')
+	return findcreaturesonspellrange(spelltype,direction,'pf')
 end
 
 -- @name	findmonsteronspellrange
@@ -1568,7 +1606,7 @@ end
 -- @returns creature
 
 function findmonstersonspellrange(spelltype,direction)
-	findcreaturesonspellrange(spelltype,direction,'mf')
+	return findcreaturesonspellrange(spelltype,direction,'mf')
 end
 
 -- @name	findcreatureontile
@@ -3106,6 +3144,9 @@ local travelnpcs = {
 	{'Reed', {cemetery = {32798,31103,7}, magician = {32806,31103,7}}, 'yalaharguard'},
 	{'Tony', {arena = {32695,31253,7}, foreigner = {32695,31260,7}}, 'yalaharguard'},
 	{'Scrutinon', {abdendriel = {32733,31668,6}, edron = {33175,31764,6}, darashia = {33289,32480,6}, venore = {32954,32023,6}}},
+	{'Captain Gulliver', {thais = {32312,32211,6}}},
+	{'Cornell', {grimvale = {33341,31693,7}, edron = {33304,31721,7}}},
+	{'Captain Pelagia', {venore = {32953,32024,6}, edron = {33175,31764,6}, darashia = {33289,32480,6}, oramond = {33479,31985,7} }}
 }
  
 function findtravelnpc()
@@ -3401,17 +3442,34 @@ function fishinice(x, y, z, pickid) -- by botterxxx
 	if pickid == nil then
 		pickid = 3456
 	end
+
+	local fishes = {'Northern Pike', 'Rainbow Trout', 'Green Perch'}
 	if x and y and z and math.abs($posx-x) <= 7 and math.abs($posy-y) <= 5 and $posz == z then
 		reachlocation(x,y,z)
 		if (isitemontile(7200,x,y,z) or isitemontile(7236,x,y,z)) and not ($posx == x and $posy == y and $posz == z) then
 			local id = topitem(x,y,z).id
+
 			while id ~= 7237 do
 				if id == 7200 then
-					useitemon(pickid,id,ground(x,y,z))
+					useitemon(pickid, id, ground(x,y,z)) waitping()
 				elseif id == 7236 then
-					useitemon(3483,id,ground(x,y,z))
+					local counts = {}
+
+					for _, fish in ipairs(fishes) do
+						counts[fish] = itemcount(fish)
+					end
+
+					useitemon(3483, id, ground(x,y,z)) waitping()
+
+					for _, fish in ipairs(fishes) do
+						local curCount = itemcount(fish)
+
+						if curCount > counts[fish] then
+							increaseamountlooted(fish, curCount - counts[fish])
+						end
+					end
 				elseif not itemproperty(id,ITEM_NOTMOVEABLE) then
-					moveitems(id,ground($posx,$posy,$posz),ground(x,y,z),100)
+					moveitems(id, ground($posx,$posy,$posz), ground(x,y,z), 100) waitping()
 				else
 					return false
 				end
@@ -3422,6 +3480,7 @@ function fishinice(x, y, z, pickid) -- by botterxxx
 	end
 	return false
 end
+
 
 -- @param	x		The x-axis position
 
@@ -3907,11 +3966,14 @@ function potionfriend(id,pc,dist,...)
 	end
 	if not id then
 		local potions = {
-							{id = 7643, level = 130},
-							{id = 239, level = 80},
-							{id = 236, level = 50},
-							{id = 266, level = 0}
-						}
+			{id = 23375, level = 200},
+			{id = 23374, level = 130},
+			{id = 23373, level = 130},
+			{id = 7643, level = 130},
+			{id = 239, level = 80},
+			{id = 236, level = 50},
+			{id = 266, level = 0}
+		}
 		for i,j in ipairs(potions) do
 			if itemcount(j.id) > 0 and $level >= j.level then
 				id = j.id
@@ -6938,6 +7000,13 @@ function offlinetrain(skillname, cityname)
 		useitem(id, 'ground') wait(1000, 2000)
 	end
 	pausewalking(0)
+end
+
+-- @name	pvpsafeworld
+-- @desc	Checks if you are logged into pvp safe world.
+-- @returns boolean
+function pvpsafeworld()
+	return table.find({'Chrona', 'Morta', 'Mortera', 'Calva', 'Calvera', 'Eldera', 'Dolera', 'Inferna'}, $worldname) == nil
 end
 
 printf('Lucas Terra Library Version: %s', LIBS.LUCAS)
