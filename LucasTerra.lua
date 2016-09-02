@@ -1558,7 +1558,7 @@ end
 -- @returns creature
 
 function findplayersonspellrange(spelltype,direction)
-	findcreaturesonspellrange(spelltype,direction,'pf')
+	return findcreaturesonspellrange(spelltype,direction,'pf')
 end
 
 -- @name	findmonsteronspellrange
@@ -1568,7 +1568,7 @@ end
 -- @returns creature
 
 function findmonstersonspellrange(spelltype,direction)
-	findcreaturesonspellrange(spelltype,direction,'mf')
+	return findcreaturesonspellrange(spelltype,direction,'mf')
 end
 
 -- @name	findcreatureontile
@@ -3106,6 +3106,9 @@ local travelnpcs = {
 	{'Reed', {cemetery = {32798,31103,7}, magician = {32806,31103,7}}, 'yalaharguard'},
 	{'Tony', {arena = {32695,31253,7}, foreigner = {32695,31260,7}}, 'yalaharguard'},
 	{'Scrutinon', {abdendriel = {32733,31668,6}, edron = {33175,31764,6}, darashia = {33289,32480,6}, venore = {32954,32023,6}}},
+	{'Captain Gulliver', {thais = {32312,32211,6}}},
+	{'Cornell', {grimvale = {33341,31693,7}, edron = {33304,31721,7}}},
+	{'Captain Pelagia', {venore = {32953,32024,6}, edron = {33175,31764,6}, darashia = {33289,32480,6}, oramond = {33479,31985,7} }}
 }
  
 function findtravelnpc()
@@ -3401,17 +3404,34 @@ function fishinice(x, y, z, pickid) -- by botterxxx
 	if pickid == nil then
 		pickid = 3456
 	end
+
+	local fishes = {'Northern Pike', 'Rainbow Trout', 'Green Perch'}
 	if x and y and z and math.abs($posx-x) <= 7 and math.abs($posy-y) <= 5 and $posz == z then
 		reachlocation(x,y,z)
 		if (isitemontile(7200,x,y,z) or isitemontile(7236,x,y,z)) and not ($posx == x and $posy == y and $posz == z) then
 			local id = topitem(x,y,z).id
+
 			while id ~= 7237 do
 				if id == 7200 then
-					useitemon(pickid,id,ground(x,y,z))
+					useitemon(pickid, id, ground(x,y,z)) waitping()
 				elseif id == 7236 then
-					useitemon(3483,id,ground(x,y,z))
+					local counts = {}
+
+					for _, fish in ipairs(fishes) do
+						counts[fish] = itemcount(fish)
+					end
+
+					useitemon(3483, id, ground(x,y,z)) waitping()
+
+					for _, fish in ipairs(fishes) do
+						local curCount = itemcount(fish)
+
+						if curCount > counts[fish] then
+							increaseamountlooted(fish, curCount - counts[fish])
+						end
+					end
 				elseif not itemproperty(id,ITEM_NOTMOVEABLE) then
-					moveitems(id,ground($posx,$posy,$posz),ground(x,y,z),100)
+					moveitems(id, ground($posx,$posy,$posz), ground(x,y,z), 100) waitping()
 				else
 					return false
 				end
@@ -3907,11 +3927,14 @@ function potionfriend(id,pc,dist,...)
 	end
 	if not id then
 		local potions = {
-							{id = 7643, level = 130},
-							{id = 239, level = 80},
-							{id = 236, level = 50},
-							{id = 266, level = 0}
-						}
+			{id = 23375, level = 200},
+			{id = 23374, level = 130},
+			{id = 23373, level = 130},
+			{id = 7643, level = 130},
+			{id = 239, level = 80},
+			{id = 236, level = 50},
+			{id = 266, level = 0}
+		}
 		for i,j in ipairs(potions) do
 			if itemcount(j.id) > 0 and $level >= j.level then
 				id = j.id
