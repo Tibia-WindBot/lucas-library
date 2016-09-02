@@ -2276,7 +2276,7 @@ function FISHSPOTS:update(id)
 					end
 				elseif (type(self.id) == 'number' and self.id == cur.id) or table.find(self.id,cur.id) then
 					local insert = true
-					
+
 					--[[local tile = gettile(cur.x,cur.y,cur.z)
 					for k=1, tile.itemcount do
 						local tempid = tile.item[k].id
@@ -2529,7 +2529,7 @@ function removefromsafelist(safetype, ...)
 	if not pos then
 		return
 	end
-	
+
 	local cursafe = getsetting('Alerts/'..alarmtypes[pos]..'/SafeList'):token(nil,'\n')
 	table.lower(cursafe)
 	for i,j in ipairs({...}) do
@@ -3107,7 +3107,7 @@ local travelnpcs = {
 	{'Tony', {arena = {32695,31253,7}, foreigner = {32695,31260,7}}, 'yalaharguard'},
 	{'Scrutinon', {abdendriel = {32733,31668,6}, edron = {33175,31764,6}, darashia = {33289,32480,6}, venore = {32954,32023,6}}},
 }
- 
+
 function findtravelnpc()
 	for i,j in ipairs(travelnpcs) do
 		npcname = j[1]
@@ -3119,13 +3119,13 @@ function findtravelnpc()
 	end
 	return nil
 end
- 
+
 -- @name	travel
 -- @desc		Travel to the destination.
 -- @param	destin	The destination name.
 -- @param	havering	Set true if you want to use 'dwarven ring' to travel with Buddel.
 -- @returns void
- 
+
 function travel(destin, havering) -- Credits to botterxxx for finding all the destination positions.
 	destin = destin:lower()
 	if havering == nil and itemcount('dwarven ring') > 0 then
@@ -4094,12 +4094,12 @@ end
 function waitcondition(conditionFunction, defaultTimeout)
 	local startTime = $timems
 	defaultTimeout = defaultTimeout or 2000
-	
+
 	if (type(conditionFunction) ~= 'function') then
 		printerror('A function must be passed as parameter to waitcondition')
 		return
 	end
-	
+
 	while (not conditionFunction() and $timems < startTime + defaultTimeout) do
 		wait(100)
 	end
@@ -5624,16 +5624,16 @@ function depositerbank(supplycategory, extragold, logoutifnocash)
 			npccount = npccount + 1
 		end
 	end
-	
+
 	if npccount == 0 then
 		printerror('Unable to find a NPC close to you')
 		return
 	end
-	
+
 	local currentnpcmsg = $lastnpcmsg
 	local tries = 0
 	local maxtries = math.random(3, 5)
-	
+
 	if not ischannel('NPCs') then
 		say('hi')
 	else
@@ -5688,7 +5688,7 @@ function depotindextoid(index)
 		return 22796 + index
 	end
 	-- might add some later if new depots gets added
-	
+
 	return 0
 end
 
@@ -5716,7 +5716,7 @@ function opendepot(depotindex, openlockeronly) -- thanks to sirmate
 		depotindex = depotindex or ($favoritedepot or 1)
 	end
 	local depotboxid = depotindextoid(depotindex)
-	
+
 	if (windowcount('Depot') > 0 and not openlockeronly) or (openlockeronly and windowcount('Locker') > 0) then
 		return true
 	end
@@ -5800,7 +5800,7 @@ function opendepot(depotindex, openlockeronly) -- thanks to sirmate
 
 		DEPOT_CHEST_TRIES = DEPOT_CHEST_TRIES + 1
 	until depotcontainer.itemid == 3502 or DEPOT_CHEST_TRIES > 5
-	
+
 	if (depotcontainer.item[depotindex].id == depotboxid) then
 		DEPOT_CHEST_TRIES = 0
 		repeat
@@ -5856,13 +5856,13 @@ end
 -- @name 	deposititems
 -- @desc 		Deposits all items from a given backpack inside backpacks in depot chest.
 -- @param 	frombp				The backpack to move items from
--- @param   lootingcategory1 	The looting category to move items from 
+-- @param   lootingcategory1 	The looting category to move items from
 -- @param 	tobp1				The backpack to move items on to
--- @param   lootingcategory2 	The looting category to move items from 
+-- @param   lootingcategory2 	The looting category to move items from
 -- @param 	tobp2				The backpack to move items on to
 -- @returns void
 
-function deposititems(frombp, ...)	
+function deposititems(frombp, ...)
 	local args = {...}
 	local argcount = #args
 
@@ -5874,7 +5874,7 @@ function deposititems(frombp, ...)
 		end
 
 		return nil
-	end	
+	end
 
 	local function getdestination(lootinginfo)
 		for i = 1, argcount, 2 do
@@ -6076,7 +6076,7 @@ end
 local function __creaturesaround(callfunction, callparams, list, issafelist, filter)
 	local count = 0
 	table.lower(list)
-	
+
 	foreach creature m filter do
 		if m ~= $self and callfunction(m, unpack(callparams)) and (#list == 0 or (not issafelist and table.find(list, m.name:lower())) or (issafelist and not table.find(list, m.name:lower()))) then
 			count = count + 1
@@ -6226,13 +6226,13 @@ end
 -- around spell/spellignore
 local function __crearoundspell_callback(spell, dir, cretype, ignore, list)
 	local Count = 0
-	
+
 	foreach creature cre cretype do
 		if isonspellarea(cre, spell, dir) and (#list == 0 or (not ignore and table.find(list, cre.name:lower())) or (ignore and not table.find(list, cre.name:lower()))) then
 			Count = Count + 1
 		end
 	end
-	
+
 	return Count
 end
 
@@ -6287,7 +6287,7 @@ end
 -- @param	name¹, name², name*, ...	The monsters names to disconsider.
 -- @returns integer
 
-function maroundspellignore(spell, dir, ...) -- Working 
+function maroundspellignore(spell, dir, ...) -- Working
 	local creatures, directions = {...}, {'w', 'e', 's', 'n', 'any'}
 
 	table.lower(creatures)
@@ -6433,7 +6433,7 @@ function entermachine(stoneid, maxtries)
 
 	local x, y, z = 33268, 31830, 10
 	local off_id, on_id = 842, 846
-		
+
 	if $posz ~= z then
 		return false
 	end
@@ -6443,7 +6443,7 @@ function entermachine(stoneid, maxtries)
 	local count = 0
 	local laststonecount = itemcount(stoneid)
 	local deltatries = 0
-	
+
 	while laststonecount >= 1 and tries < maxtries and $posz == z do
 		if (math.abs($posx - x) > 1 or math.abs($posy - y) > 1) then
 			reachlocation(x, y, z)
@@ -6452,25 +6452,25 @@ function entermachine(stoneid, maxtries)
 		while topitem(x, y, z).id == on_id do
 			useitem(on_id, ground(x, y, z)) waitping()
 		end
-		
+
 		useitemon(stoneid, off_id, ground(x, y, z)) wait(1000, 1200)
-		
+
 		local curcount = itemcount(stoneid)
 		local delta = laststonecount - curcount
-		
+
 		count = count + delta
 		if delta == 0 then
 			deltatries = deltatries + 1
 		end
-		
+
 		if count >= 20 or deltatries >= 4 then
 			break
 		end
-		
+
 		laststonecount = curcount
 		tries = tries + 1
 	end
-	
+
 	tries = 0
 	repeat
 		useitem(off_id, ground(x, y, z)) waitping()
@@ -6569,7 +6569,7 @@ local function _fillSkinSpots(toolName, dist)
 	if $timems-positionsTable.lastUpdate <= 200 then
 		return
 	end
-	
+
 	local bodyTable = bodies[toolName]
 	positionsTable.positions = {}
 	positionsTable.lastUpdate = $timems
@@ -6807,7 +6807,7 @@ local function _skin(dist, waitFresh, moveBody, toolName)
 		return false
 	end
 
-	-- start	
+	-- start
 	_fillSkinSpots(toolName, dist)
 	local bodyTable = bodies[toolName]
 	local positionsTable = tempBodiesPositions[toolName]
@@ -6930,7 +6930,7 @@ function offlinetrain(skillname, cityname)
 		return
 	end
 	local x, y, z, w, h, id = getofflinetraininglocation(skillname, cityname)
-	
+
 	while $connected do
 		pausewalking(360000)
 		setlifetime(360000)
@@ -6938,6 +6938,10 @@ function offlinetrain(skillname, cityname)
 		useitem(id, 'ground') wait(1000, 2000)
 	end
 	pausewalking(0)
+end
+
+function test()
+	print('Testing!')
 end
 
 printf('Lucas Terra Library Version: %s', LIBS.LUCAS)
