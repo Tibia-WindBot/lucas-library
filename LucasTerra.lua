@@ -6734,12 +6734,11 @@ local function _skin(dist, waitFresh, moveBody, toolName)
 			if info.iscontainer then
 				for _, bodyInfo in ipairs(bodyTable) do
 					if topItem.id == bodyInfo[1] or topItem.id == bodyInfo[2] then
-						local bodyId = topItem.id
 						foundOnTop = true
-
+						
 						local tempCount = itemcount(bodyInfo[4])
 
-						useitemon(toolName, bodyId, ground(sqm.x, sqm.y, sqm.z))
+						useitemon(toolName, 0, ground(sqm.x, sqm.y, sqm.z))
 						wait(1000, 1200)
 
 						local delta = itemcount(bodyInfo[4]) - tempCount
