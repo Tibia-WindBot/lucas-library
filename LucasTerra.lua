@@ -5683,12 +5683,15 @@ function depositerbank(supplycategory, extragold, logoutifnocash)
 	local success = false
 	repeat
 		if $balance >= towithdraw then
-			repeat
-				npcsay('withdraw '..towithdraw) wait(500,1000)
-				npcsay('yes')
+			-- Premium players no longer need to withdraw gold
+			if not $premium then
+				repeat
+					npcsay('withdraw '..towithdraw) wait(500,1000)
+					npcsay('yes')
 
-				success = waitmessage('', 'Here you are, '..towithdraw..' gold. Please let me know if there is something else I can do for you.', 2000, false, MSG_NPC)
-			until success
+					success = waitmessage('', 'Here you are, '..towithdraw..' gold. Please let me know if there is something else I can do for you.', 2000, false, MSG_NPC)
+				until success
+			end
 		else
 			if (logoutifnocash) then
 				printerror('Your character has logged out because you don\'t have enough money in bank.')
