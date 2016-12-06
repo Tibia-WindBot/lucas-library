@@ -5676,33 +5676,16 @@ function depositerbank(supplycategory, extragold, logoutifnocash)
 
 	-- withdraw needed money
 	local towithdraw = moneytowithdraw(supplycategory) + extragold
-	if towithdraw == 0 then
-		return
-	end
+	if $balance < towithdraw
+		if (logoutifnocash) then
+			printerror('Your character has logged out because you don\'t have enough money in bank.')
+			xlog(true)
 
-	local success = false
-	repeat
-		if $balance >= towithdraw then
-			-- Premium players no longer need to withdraw gold
-			if not $premium then
-				repeat
-					npcsay('withdraw '..towithdraw) wait(500,1000)
-					npcsay('yes')
-
-					success = waitmessage('', 'Here you are, '..towithdraw..' gold. Please let me know if there is something else I can do for you.', 2000, false, MSG_NPC)
-				until success
-			end
-		else
-			if (logoutifnocash) then
-				printerror('Your character has logged out because you don\'t have enough money in bank.')
-				xlog(true)
-
-				setcavebot('off')
-				return
-			end
-			playsoundflash('monster.wav') wait(1000)
+			setcavebot('off')
 		end
-	until success
+
+		playsoundflash('monster.wav')
+	end
 end
 
 -- @name	depotindextoid
