@@ -5652,8 +5652,8 @@ function depositerbank(supplycategory, extragold, logoutifnocash)
 
 	-- withdraw needed money
 	local towithdraw = moneytowithdraw(supplycategory) + extragold
-	if $balance < towithdraw
-		if (logoutifnocash) then
+	if $balance < towithdraw then
+		if logoutifnocash then
 			printerror('Your character has logged out because you don\'t have enough money in bank.')
 			xlog(true)
 
