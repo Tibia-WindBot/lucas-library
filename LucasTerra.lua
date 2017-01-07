@@ -7,7 +7,7 @@
 
 -- [[MAP END]] --
 
-LUCAS_LIB = '16.4'
+LUCAS_LIB = '16.6'
 
 LIBS = LIBS or {}
 LIBS.LUCAS = LUCAS_LIB
@@ -3899,7 +3899,7 @@ function movecreature(who, direction)
 	local movecreatureto = {}
 	local dir,dirx,diry = wheretomovecreature(who.posx,who.posy,who.posz,direction)
 	if dir ~= '' then
-		local topid = topitem(who.posx,who.posy,who.posz).id
+		local topid = topmoveitem(who.posx,who.posy,who.posz).id
 		movecreatureto = {dirx+who.posx,diry+who.posy,$posz}
 		if who.posz == $posz and not (movecreatureto[1] == who.posx and movecreatureto[2] == who.posy) and not (movecreatureto[1] == $posx and movecreatureto[2] == $posy) and (itemproperty(topid,ITEM_GROUND) or itemproperty(topid, ITEM_NOTMOVEABLE)) then
 			moveitems(99,ground(unpack(movecreatureto)),ground(who.posx,who.posy,who.posz),100) wait(1200,1500)
@@ -4135,29 +4135,22 @@ end
 -- @returns void
 
 function waitcontainer(containername, newwindow)
-	if newwindow or not containername then
+	local containernumber = tonumber(containername)
+	
+	if newwindow or not containername or not containernumber then
 		local i = $timems + 2000
 		local curcount = windowcount(containername)
 		while i >= $timems and windowcount(containername) == curcount do
 			wait(100)
 		end
 	else
-		local containernumber = tonumber(containername)
-		if not containernumber then
-			local i = $timems + 2000
-			local curcount = windowcount(containername)
-			while i >= $timems and windowcount(containername) == curcount do
-				wait(100)
-			end
-		else
-			local cont = {}
-			copycontainer(getcontainer(containernumber),cont)
-			local i = $timems+2000
-			local compare = true
-			while i >= $timems and compare do
-				wait(200)
-				compare = comparecontainers(cont, getcontainer(containernumber))
-			end
+		local cont = {}
+		copycontainer(getcontainer(containernumber),cont)
+		local i = $timems+2000
+		local compare = true
+		while i >= $timems and compare do
+			wait(200)
+			compare = comparecontainers(cont, getcontainer(containernumber))
 		end
 	end
 end
@@ -4500,10 +4493,6 @@ end
 _MOVEITEMS = _MOVEITEMS or moveitems
 function moveitems(iid, dest, from, amount)
 	dest, from = dest or '', from or ''
-	local temp = getsetting('Looting/MoveItemsQuickly')
-	if amount and amount < 100 then
-		setsetting('Looting/MoveItemsQuickly', 'no', false)
-	end
 	if dest == 'ground' and from:sub(1,6) == 'ground' then
 		local temp = from:token()
 		local pos
@@ -4518,19 +4507,6 @@ function moveitems(iid, dest, from, amount)
 		end
 	end
 	local ret = _MOVEITEMS(iid, dest, from, amount)
-	setsetting('Looting/MoveItemsQuickly', temp, false)
-	return ret
-end
-
-_EQUIPITEM = _EQUIPITEM or equipitem
-function equipitem(iid, dest, from, amount)
-	dest, from = dest or '', from or ''
-	local temp = getsetting('Looting/MoveItemsQuickly')
-	if amount and amount < 100 then
-		setsetting('Looting/MoveItemsQuickly', 'no', false)
-	end
-	local ret = _EQUIPITEM(iid, dest, from, amount)
-	setsetting('Looting/MoveItemsQuickly', temp, false)
 	return ret
 end
 
@@ -4853,7 +4829,7 @@ function eatfood(location, hungerTimeControl, ...)
 		local foundfood = false
 		for j=-1, 1 do
 			for i=-1, 1 do
-				local topid = topitem($posx+i, $posy+j, $posz).id
+				local topid = topuseitem($posx+i, $posy+j, $posz).id
 				local foodtime = getfoodtime(topid)
 				if isfood(topid) and foodtime+gethungrytime() <= 1200000 then
 					useitem(topid, ground($posx+i, $posy+j, $posz)) wait(100) increasehungrytime(foodtime) return true
@@ -4863,7 +4839,7 @@ function eatfood(location, hungerTimeControl, ...)
 	elseif location:sub(1,6) == 'ground' then
 		local coord = (location:sub(8)):token()
 		coord[1],coord[2],coord[3] = tonumber(coord[1]),tonumber(coord[2]),tonumber(coord[3])
-		local topid = topitem(unpack(coord)).id
+		local topid = topuseitem(unpack(coord)).id
 		local foodtime = getfoodtime(topid)
 		if isfood(topid) and (not hungerTimeControl or foodtime+gethungrytime() <= 1200000) then
 			useitem(topid, ground(unpack(coord))) increasehungrytime(foodtime) wait(100) return true
@@ -4955,7 +4931,7 @@ function opengrounditem(id)
 	for i=SCREEN_LEFT, SCREEN_RIGHT do
 		for j=SCREEN_TOP, SCREEN_BOTTOM do
 			local x,y,z = $posx+i, $posy+j, $posz
-			local topid = topitem(x,y,z).id
+			local topid = topuseitem(x,y,z).id
 			local itemdata = iteminfo(topid)
 
 			if tilereachable(x,y,z) and (not id and itemdata.iscontainer and itemdata.lenshelp ~= 88) or topid == id then
@@ -6364,7 +6340,7 @@ function pickupitems(dir,n,amount, ...)
 		amount = 100
 	end
 	local pos = {x = $posx+dire.x[dir], y = $posy+dire.y[dir], z = $posz}
-	local topid = topitem(pos.x,pos.y,pos.z).id
+	local topid = topmoveitem(pos.x,pos.y,pos.z).id
 	if topid ~= 0 and (#items == 0 or table.find(items, topid)) and itemproperty(topid,ITEM_PICKUPABLE) then
 		moveitems(topid,n,ground(pos.x,pos.y,pos.z),amount)
 	end
