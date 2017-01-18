@@ -184,12 +184,12 @@ local cityAreas = {
 
 -- @name	currentcityname
 -- @desc.   Returns id and name of the city in which you are currently.
--- @returns string
+-- @returns id, string
 
 function currentcity()
    for _, area in ipairs(cityAreas) do
 		if #area == 5 then
-			local city, x, y, ray = unpack(area)
+			local id, city, x, y, ray = unpack(area)
 
 			if math.abs($posx - x) < ray and math.abs($posy - y) < ray then
 				return id, city
