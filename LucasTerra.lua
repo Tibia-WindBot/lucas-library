@@ -184,7 +184,7 @@ local cityAreas = {
 
 -- @name	currentcityname
 -- @desc.   Returns id and name of the city in which you are currently.
--- @returns id, string
+-- @returns integer, string
 
 function currentcity()
    for _, area in ipairs(cityAreas) do
