@@ -6990,4 +6990,101 @@ function pvpsafeworld()
 	return not table.find({'Chrona', 'Morta', 'Mortera', 'Calva', 'Calvera', 'Eldera', 'Dolera', 'Inferna'}, $worldname)
 end
 
+
+-- @name 	usetrainer (credits to @Raphael)
+-- @desc 	Uses training statue that fits your best skill
+-- @returns bool
+function usetrainer()
+	local skillTypes = {'sword', 'axe', 'club', 'distance', 'magic'}
+
+	local skill = 'none'
+	if $vocation == 'sorcerer' or $vocation == 'druid' then
+		skill = 'magic'
+	elseif $vocation == 'paladin' then
+		skill = 'distance'
+	else
+		if $axe > $sword and $axe > $club then
+			skill = 'axe'
+		elseif $sword > $axe and $sword > $club then
+			skill = 'sword'
+		else
+			skill = 'club'
+		end
+	end
+
+	if skill == 'none' then
+		return false
+	end
+
+	local statueId = 16197 + table.find(skillTypes, skill)
+
+	for x = SCREEN_LEFT, SCREEN_RIGHT do
+		for y = SCREEN_TOP, SCREEN_BOTTOM do
+			local id = topuseitem($posx + x, $posy + y, $posz).id
+
+			if id == statueId then
+				while $connected do
+					reachgrounditem(statueId) waitping()
+					useitem(statueId, 'ground')
+				end
+
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
+
+-- @name 	blesscost
+-- @desc 	Returns number (money needed for a single bless)
+-- @returns integer
+function blesscost()
+	if $level == 0 then
+		return -1
+	end
+
+	return math.min(math.max(($level - 20) * 200, 2000), 20000)
+end
+
+
+SetupEventManager = { __class = 'SetupEventManager' }
+SetupEventManagerMT = { __index = SetupEventManager }
+
+-- @name 	SetupEventManager.new
+-- @desc 	Creates new 'object' responsible for handling setup events
+-- @returns SetupEventManager
+function SetupEventManager.new()
+	local newObj = {
+		events = {}
+	}
+
+	setmetatable(newObj, SetupEventManagerMT)
+	return newObj
+end
+
+-- @name 	SetupEventManager:register
+-- @desc 	Registers new event handler for a specified setup item with name 'id'. If the event is triggered it will execute given callback
+-- @returns SetupEventManager
+function SetupEventManager:register(id, callback)
+	self.events[id] = callback
+
+	local opt = getuseroption(id)
+	if opt then
+		return callback(opt)
+	end
+end
+
+-- @name 	SetupEventManager:handleInput
+-- @desc 	Handles all registered events
+-- @returns callback
+function SetupEventManager:handleInput(e)
+	for id, callback in pairs(self.events) do
+		if e.name == id then
+			return callback(e.value)
+		end
+	end
+end
+
 printf('Lucas Terra Library Version: %s', LIBS.LUCAS)
