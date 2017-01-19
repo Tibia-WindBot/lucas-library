@@ -6994,14 +6994,13 @@ end
 -- @desc 	Returns skill that's in use. If no skill is found, returns 'none'.
 -- @returns string
 function usedskill()
-	local skillTypes = {'sword', 'axe', 'club', 'distance', 'magic'}
-
 	local skill = 'none'
+
 	if $vocation == 'sorcerer' or $vocation == 'druid' then
 		skill = 'magic'
 	elseif $vocation == 'paladin' then
 		skill = 'distance'
-	else
+	elseif $vocation == 'knight' then
 		if $axe > $sword and $axe > $club then
 			skill = 'axe'
 		elseif $sword > $axe and $sword > $club then
@@ -7018,6 +7017,7 @@ end
 -- @desc 	Uses training statue that fits your best skill
 -- @returns bool
 function usetrainer()
+	local skillTypes = {'sword', 'axe', 'club', 'distance', 'magic'}
 	local skill = usedskill()
 
 	if skill == 'none' then
