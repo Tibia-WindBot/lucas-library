@@ -7,7 +7,7 @@
 
 -- [[MAP END]] --
 
-LUCAS_LIB = '16.4'
+LUCAS_LIB = '16.6'
 
 LIBS = LIBS or {}
 LIBS.LUCAS = LUCAS_LIB
@@ -1617,7 +1617,7 @@ end
 -- @returns creature
 
 function findplayersonspellrange(spelltype,direction)
-	findcreaturesonspellrange(spelltype,direction,'pf')
+	return findcreaturesonspellrange(spelltype,direction,'pf')
 end
 
 -- @name	findmonsteronspellrange
@@ -1627,7 +1627,7 @@ end
 -- @returns creature
 
 function findmonstersonspellrange(spelltype,direction)
-	findcreaturesonspellrange(spelltype,direction,'mf')
+	return findcreaturesonspellrange(spelltype,direction,'mf')
 end
 
 -- @name	findcreatureontile
@@ -3165,6 +3165,9 @@ local travelnpcs = {
 	{'Reed', {cemetery = {32798,31103,7}, magician = {32806,31103,7}}, 'yalaharguard'},
 	{'Tony', {arena = {32695,31253,7}, foreigner = {32695,31260,7}}, 'yalaharguard'},
 	{'Scrutinon', {abdendriel = {32733,31668,6}, edron = {33175,31764,6}, darashia = {33289,32480,6}, venore = {32954,32023,6}}},
+	{'Captain Gulliver', {thais = {32312,32211,6}}},
+	{'Cornell', {grimvale = {33341,31693,7}, edron = {33304,31721,7}}},
+	{'Captain Pelagia', {venore = {32953,32024,6}, edron = {33175,31764,6}, darashia = {33289,32480,6}, oramond = {33479,31985,7} }}
 }
  
 function findtravelnpc()
@@ -3460,17 +3463,34 @@ function fishinice(x, y, z, pickid) -- by botterxxx
 	if pickid == nil then
 		pickid = 3456
 	end
+
+	local fishes = {'Northern Pike', 'Rainbow Trout', 'Green Perch'}
 	if x and y and z and math.abs($posx-x) <= 7 and math.abs($posy-y) <= 5 and $posz == z then
 		reachlocation(x,y,z)
 		if (isitemontile(7200,x,y,z) or isitemontile(7236,x,y,z)) and not ($posx == x and $posy == y and $posz == z) then
 			local id = topitem(x,y,z).id
+
 			while id ~= 7237 do
 				if id == 7200 then
-					useitemon(pickid,id,ground(x,y,z))
+					useitemon(pickid, id, ground(x,y,z)) waitping()
 				elseif id == 7236 then
-					useitemon(3483,id,ground(x,y,z))
+					local counts = {}
+
+					for _, fish in ipairs(fishes) do
+						counts[fish] = itemcount(fish)
+					end
+
+					useitemon(3483, id, ground(x,y,z)) waitping()
+
+					for _, fish in ipairs(fishes) do
+						local curCount = itemcount(fish)
+
+						if curCount > counts[fish] then
+							increaseamountlooted(fish, curCount - counts[fish])
+						end
+					end
 				elseif not itemproperty(id,ITEM_NOTMOVEABLE) then
-					moveitems(id,ground($posx,$posy,$posz),ground(x,y,z),100)
+					moveitems(id, ground($posx,$posy,$posz), ground(x,y,z), 100) waitping()
 				else
 					return false
 				end
@@ -3938,7 +3958,7 @@ function movecreature(who, direction)
 	local movecreatureto = {}
 	local dir,dirx,diry = wheretomovecreature(who.posx,who.posy,who.posz,direction)
 	if dir ~= '' then
-		local topid = topitem(who.posx,who.posy,who.posz).id
+		local topid = topmoveitem(who.posx,who.posy,who.posz).id
 		movecreatureto = {dirx+who.posx,diry+who.posy,$posz}
 		if who.posz == $posz and not (movecreatureto[1] == who.posx and movecreatureto[2] == who.posy) and not (movecreatureto[1] == $posx and movecreatureto[2] == $posy) and (itemproperty(topid,ITEM_GROUND) or itemproperty(topid, ITEM_NOTMOVEABLE)) then
 			moveitems(99,ground(unpack(movecreatureto)),ground(who.posx,who.posy,who.posz),100) wait(1200,1500)
@@ -3966,11 +3986,14 @@ function potionfriend(id,pc,dist,...)
 	end
 	if not id then
 		local potions = {
-							{id = 7643, level = 130},
-							{id = 239, level = 80},
-							{id = 236, level = 50},
-							{id = 266, level = 0}
-						}
+			{id = 23375, level = 200},
+			{id = 23374, level = 130},
+			{id = 23373, level = 130},
+			{id = 7643, level = 130},
+			{id = 239, level = 80},
+			{id = 236, level = 50},
+			{id = 266, level = 0}
+		}
 		for i,j in ipairs(potions) do
 			if itemcount(j.id) > 0 and $level >= j.level then
 				id = j.id
@@ -4171,29 +4194,22 @@ end
 -- @returns void
 
 function waitcontainer(containername, newwindow)
-	if newwindow or not containername then
+	local containernumber = tonumber(containername)
+	
+	if newwindow or not containername or not containernumber then
 		local i = $timems + 2000
 		local curcount = windowcount(containername)
 		while i >= $timems and windowcount(containername) == curcount do
 			wait(100)
 		end
 	else
-		local containernumber = tonumber(containername)
-		if not containernumber then
-			local i = $timems + 2000
-			local curcount = windowcount(containername)
-			while i >= $timems and windowcount(containername) == curcount do
-				wait(100)
-			end
-		else
-			local cont = {}
-			copycontainer(getcontainer(containernumber),cont)
-			local i = $timems+2000
-			local compare = true
-			while i >= $timems and compare do
-				wait(200)
-				compare = comparecontainers(cont, getcontainer(containernumber))
-			end
+		local cont = {}
+		copycontainer(getcontainer(containernumber),cont)
+		local i = $timems+2000
+		local compare = true
+		while i >= $timems and compare do
+			wait(200)
+			compare = comparecontainers(cont, getcontainer(containernumber))
 		end
 	end
 end
@@ -4536,10 +4552,6 @@ end
 _MOVEITEMS = _MOVEITEMS or moveitems
 function moveitems(iid, dest, from, amount)
 	dest, from = dest or '', from or ''
-	local temp = getsetting('Looting/MoveItemsQuickly')
-	if amount and amount < 100 then
-		setsetting('Looting/MoveItemsQuickly', 'no', false)
-	end
 	if dest == 'ground' and from:sub(1,6) == 'ground' then
 		local temp = from:token()
 		local pos
@@ -4554,19 +4566,6 @@ function moveitems(iid, dest, from, amount)
 		end
 	end
 	local ret = _MOVEITEMS(iid, dest, from, amount)
-	setsetting('Looting/MoveItemsQuickly', temp, false)
-	return ret
-end
-
-_EQUIPITEM = _EQUIPITEM or equipitem
-function equipitem(iid, dest, from, amount)
-	dest, from = dest or '', from or ''
-	local temp = getsetting('Looting/MoveItemsQuickly')
-	if amount and amount < 100 then
-		setsetting('Looting/MoveItemsQuickly', 'no', false)
-	end
-	local ret = _EQUIPITEM(iid, dest, from, amount)
-	setsetting('Looting/MoveItemsQuickly', temp, false)
 	return ret
 end
 
@@ -4889,7 +4888,7 @@ function eatfood(location, hungerTimeControl, ...)
 		local foundfood = false
 		for j=-1, 1 do
 			for i=-1, 1 do
-				local topid = topitem($posx+i, $posy+j, $posz).id
+				local topid = topuseitem($posx+i, $posy+j, $posz).id
 				local foodtime = getfoodtime(topid)
 				if isfood(topid) and foodtime+gethungrytime() <= 1200000 then
 					useitem(topid, ground($posx+i, $posy+j, $posz)) wait(100) increasehungrytime(foodtime) return true
@@ -4899,7 +4898,7 @@ function eatfood(location, hungerTimeControl, ...)
 	elseif location:sub(1,6) == 'ground' then
 		local coord = (location:sub(8)):token()
 		coord[1],coord[2],coord[3] = tonumber(coord[1]),tonumber(coord[2]),tonumber(coord[3])
-		local topid = topitem(unpack(coord)).id
+		local topid = topuseitem(unpack(coord)).id
 		local foodtime = getfoodtime(topid)
 		if isfood(topid) and (not hungerTimeControl or foodtime+gethungrytime() <= 1200000) then
 			useitem(topid, ground(unpack(coord))) increasehungrytime(foodtime) wait(100) return true
@@ -4991,7 +4990,7 @@ function opengrounditem(id)
 	for i=SCREEN_LEFT, SCREEN_RIGHT do
 		for j=SCREEN_TOP, SCREEN_BOTTOM do
 			local x,y,z = $posx+i, $posy+j, $posz
-			local topid = topitem(x,y,z).id
+			local topid = topuseitem(x,y,z).id
 			local itemdata = iteminfo(topid)
 
 			if tilereachable(x,y,z) and (not id and itemdata.iscontainer and itemdata.lenshelp ~= 88) or topid == id then
@@ -5712,30 +5711,16 @@ function depositerbank(supplycategory, extragold, logoutifnocash)
 
 	-- withdraw needed money
 	local towithdraw = moneytowithdraw(supplycategory) + extragold
-	if towithdraw == 0 then
-		return
-	end
+	if $balance < towithdraw then
+		if logoutifnocash then
+			printerror('Your character has logged out because you don\'t have enough money in bank.')
+			xlog(true)
 
-	local success = false
-	repeat
-		if $balance >= towithdraw then
-			repeat
-				npcsay('withdraw '..towithdraw) wait(500,1000)
-				npcsay('yes')
-
-				success = waitmessage('', 'Here you are, '..towithdraw..' gold. Please let me know if there is something else I can do for you.', 2000, false, MSG_NPC)
-			until success
-		else
-			if (logoutifnocash) then
-				printerror('Your character has logged out because you don\'t have enough money in bank.')
-				xlog(true)
-
-				setcavebot('off')
-				return
-			end
-			playsoundflash('monster.wav') wait(1000)
+			setcavebot('off')
 		end
-	until success
+
+		playsoundflash('monster.wav')
+	end
 end
 
 -- @name	depotindextoid
@@ -6414,7 +6399,7 @@ function pickupitems(dir,n,amount, ...)
 		amount = 100
 	end
 	local pos = {x = $posx+dire.x[dir], y = $posy+dire.y[dir], z = $posz}
-	local topid = topitem(pos.x,pos.y,pos.z).id
+	local topid = topmoveitem(pos.x,pos.y,pos.z).id
 	if topid ~= 0 and (#items == 0 or table.find(items, topid)) and itemproperty(topid,ITEM_PICKUPABLE) then
 		moveitems(topid,n,ground(pos.x,pos.y,pos.z),amount)
 	end
@@ -6770,12 +6755,11 @@ local function _skin(dist, waitFresh, moveBody, toolName)
 			if info.iscontainer then
 				for _, bodyInfo in ipairs(bodyTable) do
 					if topItem.id == bodyInfo[1] or topItem.id == bodyInfo[2] then
-						local bodyId = topItem.id
 						foundOnTop = true
-
+						
 						local tempCount = itemcount(bodyInfo[4])
 
-						useitemon(toolName, bodyId, ground(sqm.x, sqm.y, sqm.z))
+						useitemon(toolName, 0, ground(sqm.x, sqm.y, sqm.z))
 						wait(1000, 1200)
 
 						local delta = itemcount(bodyInfo[4]) - tempCount
