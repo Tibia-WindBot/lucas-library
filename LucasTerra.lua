@@ -7013,14 +7013,14 @@ function usedskill()
 	return skill
 end
 
--- @name 	usetrainer (credits to @Raphael)
--- @desc 	Uses training statue that fits your best skill
+-- @name 	usetrainer
+-- @desc 	Uses training statue that fits your best skill (credits to @Raphael)
 -- @returns bool
 function usetrainer()
 	local skillTypes = {'sword', 'axe', 'club', 'distance', 'magic'}
 	local skill = usedskill()
 
-	if skill == 'none' then
+	if skill == 'none' or not $premium then
 		return false
 	end
 
