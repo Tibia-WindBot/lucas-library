@@ -6990,10 +6990,10 @@ function pvpsafeworld()
 	return not table.find({'Chrona', 'Morta', 'Mortera', 'Calva', 'Calvera', 'Eldera', 'Dolera', 'Inferna'}, $worldname)
 end
 
--- @name 	usetrainer (credits to @Raphael)
--- @desc 	Uses training statue that fits your best skill
--- @returns bool
-function usetrainer()
+-- @name 	usedskill
+-- @desc 	Returns skill that's in use. If no skill is found, returns 'none'.
+-- @returns string
+function usedskill()
 	local skillTypes = {'sword', 'axe', 'club', 'distance', 'magic'}
 
 	local skill = 'none'
@@ -7010,6 +7010,15 @@ function usetrainer()
 			skill = 'club'
 		end
 	end
+
+	return skill
+end
+
+-- @name 	usetrainer (credits to @Raphael)
+-- @desc 	Uses training statue that fits your best skill
+-- @returns bool
+function usetrainer()
+	local skill = usedskill()
 
 	if skill == 'none' then
 		return false
