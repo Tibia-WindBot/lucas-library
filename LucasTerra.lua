@@ -7006,4 +7006,50 @@ function pvpsafeworld()
 	return not table.find({'Chrona', 'Morta', 'Mortera', 'Calva', 'Calvera', 'Eldera', 'Dolera', 'Inferna'}, $worldname)
 end
 
+-- @name 	usetrainer (credits to @Raphael)
+-- @desc 	Uses training statue that fits your best skill
+-- @returns bool
+function usetrainer()
+	local skillTypes = {'sword', 'axe', 'club', 'distance', 'magic'}
+
+	local skill = 'none'
+	if $vocation == 'sorcerer' or $vocation == 'druid' then
+		skill = 'magic'
+	elseif $vocation == 'paladin' then
+		skill = 'distance'
+	else
+		if $axe > $sword and $axe > $club then
+			skill = 'axe'
+		elseif $sword > $axe and $sword > $club then
+			skill = 'sword'
+		else
+			skill = 'club'
+		end
+	end
+
+	if skill == 'none' then
+		return false
+	end
+
+	local statueId = 16197 + table.find(skillTypes, skill)
+
+	for x = SCREEN_LEFT, SCREEN_RIGHT do
+		for y = SCREEN_TOP, SCREEN_BOTTOM do
+			local id = topuseitem($posx + x, $posy + y, $posz).id
+
+			if id == statueId then
+				while $connected do
+					reachgrounditem(statueId) waitping()
+					useitem(statueId, 'ground')
+				end
+
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
+
 printf('Lucas Terra Library Version: %s', LIBS.LUCAS)
