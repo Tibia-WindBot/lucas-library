@@ -7,7 +7,7 @@
 
 -- [[MAP END]] --
 
-LUCAS_LIB = '16.6'
+LUCAS_LIB = '16.7'
 
 LIBS = LIBS or {}
 LIBS.LUCAS = LUCAS_LIB
