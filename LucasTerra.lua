@@ -2515,34 +2515,47 @@ end
 -- @param	logout	Set 'no' or 'yes' to logout.
 -- @returns void
 
-function setalarm(alarmtype, playsound, pausebot, logout, t)
-	local alarmtypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage", "GMDetected", "Disconnected", "CharacterStuck", "HealthBelow", "ManaBelow", "UnjustKill", "EnemiesOnline"}
-	local alarmtypesLower = alarmtypes
-	table.tolower(alarmtypesLower)
-	local pos = table.find(alarmtypesLower,alarmtype:lower())
-	if not pos then
+function setalarm(alarmType, playSound, pauseBot, logout, cloudMsg)
+	local alarmTypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage", "GMDetected", "Disconnected", "CharacterStuck", "HealthBelow", "ManaBelow", "UnjustKill", "EnemiesOnline"}
+	alarmType = alarmType:lower()
+
+	local foundAlarmType = nil
+	for _, v in ipairs(alarmTypes) do
+		if alarmType == v:lower() then
+			foundAlarmType = v
+			break
+		end
+	end
+	
+	if not foundAlarmType then
 		return
 	end
 
-	if not playsound or playsound == 'off' or playsound == 'no' or playsound == 0 then
-		playsound = 'no'
-	elseif playsound == 'on' or playsound == 'yes' or playsound == 1 then
-		playsound = 'yes'
+	if not playSound or playSound == 'off' or playSound == 'no' or playSound == 0 then
+		playSound = 'no'
+	elseif playSound or playSound == 'on' or playSound == 'yes' or playSound == 1 then
+		playSound = 'yes'
 	end
-	if not pausebot or pausebot == 'off' or pausebot == 'no' or pausebot == 0 then
-		pausebot = 'no'
-	elseif pausebot == 'on' or pausebot == 'yes' or pausebot == 1 then
-		pausebot = 'yes'
+	if not pauseBot or pauseBot == 'off' or pauseBot == 'no' or pauseBot == 0 then
+		pauseBot = 'no'
+	elseif pauseBot or pauseBot == 'on' or pauseBot == 'yes' or pauseBot == 1 then
+		pauseBot = 'yes'
 	end
 	if not logout or logout == 'off' or logout == 'no' or logout == 0 then
 		logout = 'no'
-	elseif logout == 'on' or logout == 'yes' or logout == 1 then
+	elseif logout or logout == 'on' or logout == 'yes' or logout == 1 then
 		logout = 'yes'
 	end
-	setsetting('Alerts/'..alarmtypes[pos]..'/PlaySound', playsound, t)
-	setsetting('Alerts/'..alarmtypes[pos]..'/FlashClient', playsound, t)
-	setsetting('Alerts/'..alarmtypes[pos]..'/PauseBot', pausebot, t)
-	setsetting('Alerts/'..alarmtypes[pos]..'/Disconnect', logout, t)
+	if not cloudMsg or cloudMsg == 'off' or cloudMsg == 'no' or cloudMsg == 0 then
+		cloudMsg = 'no'
+	elseif cloudMsg or cloudMsg == 'on' or cloudMsg == 'yes' or cloudMsg == 1 then
+		cloudMsg = 'yes'
+	end
+
+	setsetting('Alerts/' .. foundAlarmType .. '/PlaySound', playSound)
+	setsetting('Alerts/' .. foundAlarmType .. '/PauseBot', pauseBot)
+	setsetting('Alerts/' .. foundAlarmType .. '/Logout', logout)
+	setsetting('Alerts/' .. foundAlarmType .. '/CloudMessage', cloudMsg)
 end
 
 -- @name	addtosafelist
@@ -2551,27 +2564,37 @@ end
 -- @param	name¹, name², name*, ...	The names to add on safe list.
 -- @returns void
 
-function addtosafelist(safetype, ...)
-	local alarmtypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage", "GMDetected", "Disconnected", "CharacterStuck", "HealthBelow", "ManaBelow", "UnjustKill", "EnemiesOnline"}
-	local alarmtypesLower = alarmtypes
-	table.tolower(alarmtypesLower)
-	local pos = table.find(alarmtypesLower,alarmtype:lower())
-	if not pos then
+function addtosafelist(safeType, ...)
+	local alarmTypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage", "GMDetected", "Disconnected", "CharacterStuck", "HealthBelow", "ManaBelow", "UnjustKill", "EnemiesOnline"}
+	safeType = safeType:lower()
+
+	local foundAlarmType = nil
+	for _, v in ipairs(alarmTypes) do
+		if safeType == v:lower() then
+			foundAlarmType = v
+			break
+		end
+	end
+	
+	if not foundAlarmType then
 		return
 	end
 
-	local cursafe = getsetting('Alerts/'..alarmtypes[pos]..'/SafeList'):token(nil,'\n')
-	table.lower(cursafe)
-	for i,j in ipairs({...}) do
-		if not table.find(cursafe,j:lower()) then
-			table.insert(cursafe,j)
+	local curSafeList = getsetting('Alerts/' .. foundAlarmType .. '/UserValue'):token(nil, '\n')
+	table.lower(curSafeList)
+
+	for _, v in ipairs({...}) do
+		if not table.find(curSafeList, v:lower()) then
+			table.insert(curSafeList, v)
 		end
 	end
-	local p = ''
-	for i,j in ipairs(cursafe) do
-		p = p..j..'\n'
+
+	local safeListStr = ''
+	for _, v in ipairs(curSafeList) do
+		safeListStr = safeListStr .. v .. '\n'
 	end
-	setsetting('Alerts/'..alarmtypes[pos]..'/SafeList',p)
+
+	setsetting('Alerts/' .. foundAlarmType .. '/UserValue', safeListStr)
 end
 
 -- @name	removefromsafelist
@@ -2580,28 +2603,39 @@ end
 -- @param	name¹, name², name*, ...	The names to remove of the safe list.
 -- @returns void
 
-function removefromsafelist(safetype, ...)
-	local alarmtypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage", "GMDetected", "Disconnected", "CharacterStuck", "HealthBelow", "ManaBelow", "UnjustKill", "EnemiesOnline"}
-	local alarmtypesLower = alarmtypes
-	table.tolower(alarmtypesLower)
-	local pos = table.find(alarmtypesLower,alarmtype:lower())
-	if not pos then
+function removefromsafelist(safeType, ...)
+	local alarmTypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage", "GMDetected", "Disconnected", "CharacterStuck", "HealthBelow", "ManaBelow", "UnjustKill", "EnemiesOnline"}
+	safeType = safeType:lower()
+
+	local foundAlarmType = nil
+	for _, v in ipairs(alarmTypes) do
+		if safeType == v:lower() then
+			foundAlarmType = v
+			break
+		end
+	end
+
+	if not foundAlarmType then
 		return
 	end
 	
-	local cursafe = getsetting('Alerts/'..alarmtypes[pos]..'/SafeList'):token(nil,'\n')
-	table.lower(cursafe)
-	for i,j in ipairs({...}) do
-		local m = table.find(cursafe,j:lower())
-		if m then
-			table.remove(cursafe,m)
+	local curSafeList = getsetting('Alerts/' .. foundAlarmType .. '/UserValue'):token(nil,'\n')
+	table.lower(curSafeList)
+
+	for _, v in ipairs({...}) do
+		local entry = table.find(curSafeList, v:lower())
+
+		if entry then
+			table.remove(curSafeList, entry)
 		end
 	end
-	local p = ''
-	for i,j in ipairs(cursafe) do
-		p = p..j..'\n'
+
+	local safeListStr = ''
+	for _, v in ipairs(curSafeList) do
+		safeListStr = safeListStr .. v ..'\n'
 	end
-	setsetting('Alerts/'..alarmtypes[pos]..'/SafeList',p)
+
+	setsetting('Alerts/' .. foundAlarmType .. '/UserValue', safeListStr)
 end
 
 function swap(a, b, c)
@@ -3133,7 +3167,7 @@ local travelnpcs = {
 	{'Captain Greyhound', {abdendriel = {32733,31668,6}, edron = {33175,31764,6}, svargrond = {32341,31108,6}, thais = {32312,32211,6}, venore = {32954,32023,6}, yalahar = {32816,31272,6}}},
 	{'Captain Gulliver', {thais = {32312,32211,6}, edron = {33175,31764,6}, porthope = {32530,32784,6}, venore = {32954,32023,6}}},
 	{'Captain Seagull', {grayisland = {33190, 31984, 7}, carlin = {32387,31821,6}, edron = {33175,31764,6}, thais = {32312,32211,6}, venore = {32954,32023,6}, yalahar = {32816,31272,6}}},
-	{'Captain Seahorse', {grayisland = {33190, 31984, 7}, abdendriel = {32733,31668,6}, ankrahmun = {33091,32883,6}, carlin = {32387,31821,6}, cormaya = {33288,31956,6}, libertybay = {32283,32893,6}, porthope = {32530,32784,6}, thais = {32312,32211,6}, venore = {32954,32023,6}}},
+	{'Captain Seahorse', {grayisland = {33196, 31984, 7}, abdendriel = {32733,31668,6}, ankrahmun = {33091,32883,6}, carlin = {32387,31821,6}, cormaya = {33288,31956,6}, libertybay = {32283,32893,6}, porthope = {32530,32784,6}, thais = {32312,32211,6}, venore = {32954,32023,6}}},
 	{'Captain Sinbeard', {darashia = {33289,32480,6}, venore = {32954,32023,6}, libertybay = {32283,32893,6}, porthope = {32530,32784,6}, edron = {33175,31764,6}, yalahar = {32816,31272,6}}},
 	{'Charles', {ankrahmun = {33091,32883,6}, darashia = {33289,32480,6}, edron = {33175,31764,6}, thais = {32312,32211,6}, venore = {32954,32023,6}, libertybay = {32283,32893,6}, yalahar = {32816,31272,6}}},
 	{'Jack Fate', {ankrahmun = {33091,32883,6}, darashia = {33289,32480,6}, edron = {33175,31764,6}, porthope = {32530,32784,6}, thais = {32312,32211,6}, venore = {32954,32023,6}, yalahar = {32816,31272,6}, goroma = {32161,32558,6}, libertybay = {32283,32893,6}}},
@@ -3172,7 +3206,7 @@ local travelnpcs = {
  
 function findtravelnpc()
 	for i,j in ipairs(travelnpcs) do
-		npcname = j[1]
+		local npcname = j[1]
 		foreach creature m 'nf' do
 			if m.name == npcname then
 				return m, i
@@ -4150,7 +4184,7 @@ end
 function isrange(x,y)
 	x = x or 1
 	y = y or 1
-	return $posx <= $wptx+x and $posx >= $wptx and $posy <= $wpty+y and $posy >= $wpty and $posz == $posz
+	return $posx <= $wptx+x and $posx >= $wptx and $posy <= $wpty+y and $posy >= $wpty and $posz == $wptz
 end
 
 -- @name	isposition
