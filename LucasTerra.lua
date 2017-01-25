@@ -2510,39 +2510,47 @@ end
 -- @name	setalarm
 -- @desc		Set the alarm engine options.
 -- @param	type	Type can be any alarm name you found on the alarms engine.
--- @param	playsound	Set 'no' or 'yes' to play sound.
--- @param	pausebot	Set 'no' or 'yes' to pause bot.
--- @param	logout	Set 'no' or 'yes' to logout.
+-- @param	playsound	Set 'no' / 'yes' or false / true to play sound.
+-- @param	pausebot	Set 'no' / 'yes' or false / true to pause bot.
+-- @param	logout		Set 'no' / 'yes' or false / true or 'Logout' or 'Force Logout' or 'Close Client' to logout.
+-- @param	cloudmsg	Set 'no' / 'yes' or false / true to send cloud message when alert is triggered.
 -- @returns void
 
-function setalarm(alarmtype, playsound, pausebot, logout, t)
-	local alarmtypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage", "GMDetected", "Disconnected", "CharacterStuck", "HealthBelow", "ManaBelow", "UnjustKill", "EnemiesOnline"}
-	local alarmtypesLower = alarmtypes
-	table.tolower(alarmtypesLower)
-	local pos = table.find(alarmtypesLower,alarmtype:lower())
-	if not pos then
+function setalarm(alarmType, playSound, pauseBot, logout, cloudMsg)
+	local alarmTypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage", "GMDetected", "Disconnected", "CharacterStuck", "HealthBelow", "ManaBelow", "UnjustKill", "EnemiesOnline"}
+	alarmType = alarmType:lower()
+
+	local foundAlarmType = nil
+	for _, v in ipairs(alarmTypes) do
+		if alarmType == v:lower() then
+			foundAlarmType = v
+			break
+		end
+	end
+	
+	if not foundAlarmType then
 		return
 	end
 
-	if not playsound or playsound == 'off' or playsound == 'no' or playsound == 0 then
-		playsound = 'no'
-	elseif playsound == 'on' or playsound == 'yes' or playsound == 1 then
-		playsound = 'yes'
+	local logoutAction
+	if type(logout) == 'string' then
+		logout = logout:lower()
+
+		if logout:starts('force') then
+			logoutAction = 'Force Logout'
+		elseif logout:starts('close') then
+			logoutAction = 'Close Client'
+		end
 	end
-	if not pausebot or pausebot == 'off' or pausebot == 'no' or pausebot == 0 then
-		pausebot = 'no'
-	elseif pausebot == 'on' or pausebot == 'yes' or pausebot == 1 then
-		pausebot = 'yes'
+
+	if not logoutAction then
+		logoutAction = tobool(logout) and 'Logout' or 'no'
 	end
-	if not logout or logout == 'off' or logout == 'no' or logout == 0 then
-		logout = 'no'
-	elseif logout == 'on' or logout == 'yes' or logout == 1 then
-		logout = 'yes'
-	end
-	setsetting('Alerts/'..alarmtypes[pos]..'/PlaySound', playsound, t)
-	setsetting('Alerts/'..alarmtypes[pos]..'/FlashClient', playsound, t)
-	setsetting('Alerts/'..alarmtypes[pos]..'/PauseBot', pausebot, t)
-	setsetting('Alerts/'..alarmtypes[pos]..'/Disconnect', logout, t)
+
+	setsetting('Alerts/' .. foundAlarmType .. '/PlaySound', toyesno(playSound))
+	setsetting('Alerts/' .. foundAlarmType .. '/PauseBot', toyesno(pauseBot))
+	setsetting('Alerts/' .. foundAlarmType .. '/Logout', logoutAction)
+	setsetting('Alerts/' .. foundAlarmType .. '/CloudMessage', toyesno(cloudMsg))
 end
 
 -- @name	addtosafelist
