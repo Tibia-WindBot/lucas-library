@@ -2584,11 +2584,7 @@ function addtosafelist(safeType, ...)
 		end
 	end
 
-	local safeListStr = ''
-	for _, v in ipairs(curSafeList) do
-		safeListStr = safeListStr .. v .. '\n'
-	end
-
+	local safeListStr = table.concat(curSafeList, '\n')
 	setsetting('Alerts/' .. foundAlarmType .. '/UserValue', safeListStr)
 end
 
