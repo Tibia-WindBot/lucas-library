@@ -2559,27 +2559,37 @@ end
 -- @param	name¹, name², name*, ...	The names to add on safe list.
 -- @returns void
 
-function addtosafelist(safetype, ...)
-	local alarmtypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage", "GMDetected", "Disconnected", "CharacterStuck", "HealthBelow", "ManaBelow", "UnjustKill", "EnemiesOnline"}
-	local alarmtypesLower = alarmtypes
-	table.tolower(alarmtypesLower)
-	local pos = table.find(alarmtypesLower,alarmtype:lower())
-	if not pos then
+function addtosafelist(safeType, ...)
+	local alarmTypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage"}
+	safeType = safeType:lower()
+
+	local foundAlarmType = nil
+	for _, v in ipairs(alarmTypes) do
+		if safeType == v:lower() then
+			foundAlarmType = v
+			break
+		end
+	end
+	
+	if not foundAlarmType then
 		return
 	end
 
-	local cursafe = getsetting('Alerts/'..alarmtypes[pos]..'/SafeList'):token(nil,'\n')
-	table.lower(cursafe)
-	for i,j in ipairs({...}) do
-		if not table.find(cursafe,j:lower()) then
-			table.insert(cursafe,j)
+	local curSafeList = getsetting('Alerts/' .. foundAlarmType .. '/UserValue'):token(nil, '\n')
+	table.lower(curSafeList)
+
+	for _, v in ipairs({...}) do
+		if not table.find(curSafeList, v:lower()) then
+			table.insert(curSafeList, v)
 		end
 	end
-	local p = ''
-	for i,j in ipairs(cursafe) do
-		p = p..j..'\n'
+
+	local safeListStr = ''
+	for _, v in ipairs(curSafeList) do
+		safeListStr = safeListStr .. v .. '\n'
 	end
-	setsetting('Alerts/'..alarmtypes[pos]..'/SafeList',p)
+
+	setsetting('Alerts/' .. foundAlarmType .. '/UserValue', safeListStr)
 end
 
 -- @name	removefromsafelist
