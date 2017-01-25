@@ -3171,12 +3171,10 @@ local travelnpcs = {
 }
  
 function findtravelnpc()
-	for i,j in ipairs(travelnpcs) do
-		npcname = j[1]
-		foreach creature m 'nf' do
-			if m.name == npcname then
-				return m, i
-			end
+	foreach creature m 'nf' do
+		local pos = table.find(travelnpcs, m.name, 1)
+		if pos then
+			return m, pos
 		end
 	end
 	return nil
