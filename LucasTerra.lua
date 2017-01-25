@@ -2510,10 +2510,10 @@ end
 -- @name	setalarm
 -- @desc		Set the alarm engine options.
 -- @param	type	Type can be any alarm name you found on the alarms engine.
--- @param	playsound	Set 'no' or 'yes' to play sound.
--- @param	pausebot	Set 'no' or 'yes' to pause bot.
--- @param	logout		Set 'no' / 'Logout' / 'Force Logout' / 'Close Client' to logout.
--- @param	cloudmsg	Set 'no' or 'yes' to send cloud message when alert is triggered.
+-- @param	playsound	Set 'no' / 'yes' or false / true to play sound.
+-- @param	pausebot	Set 'no' / 'yes' or false / true to pause bot.
+-- @param	logout		Set 'no' / 'yes' or false / true or 'Logout' or 'Force Logout' or 'Close Client' to logout.
+-- @param	cloudmsg	Set 'no' / 'yes' or false / true to send cloud message when alert is triggered.
 -- @returns void
 
 function setalarm(alarmType, playSound, pauseBot, logout, cloudMsg)
@@ -2536,19 +2536,10 @@ function setalarm(alarmType, playSound, pauseBot, logout, cloudMsg)
 	if type(logout) == 'string' then
 		logout = logout:lower()
 
-		if logout:find('force') then
+		if logout:starts('force') then
 			logoutAction = 'Force Logout'
-		elseif logout:find('close') then
+		elseif logout:starts('close') then
 			logoutAction = 'Close Client'
-		elseif logout == 'logout' or logout == 'yes' then
-			logoutAction = 'Logout'
-		end
-	elseif type(logout) == 'number' then
-		local logoutActions = {'no', 'Logout', 'Force Logout', 'Close Client'}
-		local action = logoutActions[logout]
-
-		if action then
-			logoutAction = action
 		end
 	end
 
