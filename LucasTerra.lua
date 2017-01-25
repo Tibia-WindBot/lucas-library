@@ -3133,7 +3133,7 @@ local travelnpcs = {
 	{'Captain Greyhound', {abdendriel = {32733,31668,6}, edron = {33175,31764,6}, svargrond = {32341,31108,6}, thais = {32312,32211,6}, venore = {32954,32023,6}, yalahar = {32816,31272,6}}},
 	{'Captain Gulliver', {thais = {32312,32211,6}, edron = {33175,31764,6}, porthope = {32530,32784,6}, venore = {32954,32023,6}}},
 	{'Captain Seagull', {grayisland = {33190, 31984, 7}, carlin = {32387,31821,6}, edron = {33175,31764,6}, thais = {32312,32211,6}, venore = {32954,32023,6}, yalahar = {32816,31272,6}}},
-	{'Captain Seahorse', {grayisland = {33190, 31984, 7}, abdendriel = {32733,31668,6}, ankrahmun = {33091,32883,6}, carlin = {32387,31821,6}, cormaya = {33288,31956,6}, libertybay = {32283,32893,6}, porthope = {32530,32784,6}, thais = {32312,32211,6}, venore = {32954,32023,6}}},
+	{'Captain Seahorse', {grayisland = {33196, 31984, 7}, abdendriel = {32733,31668,6}, ankrahmun = {33091,32883,6}, carlin = {32387,31821,6}, cormaya = {33288,31956,6}, libertybay = {32283,32893,6}, porthope = {32530,32784,6}, thais = {32312,32211,6}, venore = {32954,32023,6}}},
 	{'Captain Sinbeard', {darashia = {33289,32480,6}, venore = {32954,32023,6}, libertybay = {32283,32893,6}, porthope = {32530,32784,6}, edron = {33175,31764,6}, yalahar = {32816,31272,6}}},
 	{'Charles', {ankrahmun = {33091,32883,6}, darashia = {33289,32480,6}, edron = {33175,31764,6}, thais = {32312,32211,6}, venore = {32954,32023,6}, libertybay = {32283,32893,6}, yalahar = {32816,31272,6}}},
 	{'Jack Fate', {ankrahmun = {33091,32883,6}, darashia = {33289,32480,6}, edron = {33175,31764,6}, porthope = {32530,32784,6}, thais = {32312,32211,6}, venore = {32954,32023,6}, yalahar = {32816,31272,6}, goroma = {32161,32558,6}, libertybay = {32283,32893,6}}},
