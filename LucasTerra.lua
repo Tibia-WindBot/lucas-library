@@ -2594,29 +2594,37 @@ end
 -- @param	name¹, name², name*, ...	The names to remove of the safe list.
 -- @returns void
 
-function removefromsafelist(safetype, ...)
-	local alarmtypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage", "GMDetected", "Disconnected", "CharacterStuck", "HealthBelow", "ManaBelow", "UnjustKill", "EnemiesOnline"}
-	local alarmtypesLower = alarmtypes
-	table.tolower(alarmtypesLower)
-	local pos = table.find(alarmtypesLower,alarmtype:lower())
-	if not pos then
+function removefromsafelist(safeType, ...)
+	local alarmTypes = {"PlayerOnScreen", "PlayerAttacking", "MonsterAttacking", "PrivateMessage", "DefaultMessage"}
+	safeType = safeType:lower()
+
+	local foundAlarmType = nil
+	for _, v in ipairs(alarmTypes) do
+		if safeType == v:lower() then
+			foundAlarmType = v
+			break
+		end
+	end
+
+	if not foundAlarmType then
 		return
 	end
 	
-	local cursafe = getsetting('Alerts/'..alarmtypes[pos]..'/SafeList'):token(nil,'\n')
-	table.lower(cursafe)
-	for i,j in ipairs({...}) do
-		local m = table.find(cursafe,j:lower())
-		if m then
-			table.remove(cursafe,m)
+	local curSafeList = getsetting('Alerts/' .. foundAlarmType .. '/UserValue'):token(nil,'\n')
+	table.lower(curSafeList)
+
+	for _, v in ipairs({...}) do
+		local entry = table.find(curSafeList, v:lower())
+
+		if entry then
+			table.remove(curSafeList, entry)
 		end
 	end
-	local p = ''
-	for i,j in ipairs(cursafe) do
-		p = p..j..'\n'
-	end
-	setsetting('Alerts/'..alarmtypes[pos]..'/SafeList',p)
+
+	local safeListStr = table.concat(curSafeList, '\n')
+	setsetting('Alerts/' .. foundAlarmType .. '/UserValue', safeListStr)
 end
+
 
 function swap(a, b, c)
 	local t
