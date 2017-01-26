@@ -4162,7 +4162,7 @@ end
 function isrange(x,y)
 	x = x or 1
 	y = y or 1
-	return $posx <= $wptx+x and $posx >= $wptx and $posy <= $wpty+y and $posy >= $wpty and $posz == $posz
+	return $posx <= $wptx+x and $posx >= $wptx and $posy <= $wpty+y and $posy >= $wpty and $posz == $wptz
 end
 
 -- @name	isposition
