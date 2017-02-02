@@ -1235,61 +1235,70 @@ end
 -- @param	action		Action can be 'open' or 'close'.
 -- @returns boolean
 
-function usedoor(x,y,z,a)
+function usedoor(x,y,z, a)
 	x,y,z = x or $wptx, y or $wpty, z or $wptz
 	if not (x and y and z and tilereachable(x,y,z)) then
 		return false
 	end
-	reachlocation(x,y,z)
-	local doorid, doortype = 0, ''
-	local topid = topitem(x,y,z).id
 
+	reachlocation(x,y,z)
+	
+	local doorId, doorType = 0, ''
 	-- checks what kind of door (opened or closed) was found on the location provided
-	local pos = table.binaryfind(closeddoorsids,topid)
-	if pos then
-		doorid = closeddoorsids[pos]
-		doortype = 'close'
-		a = a or 'open'
-	else
-		pos = table.binaryfind(openeddoorsids,topid)
-		if pos then
-			doorid = openeddoorsids[pos]
-			doortype = 'open'
+	local tile = gettile(x,y,z)
+	for k = 1, tile.itemcount do
+		local id = tile.item[k].id
+
+		if table.binaryfind(closeddoorsids, id) then
+			doorId = id
+			doorType = 'close'
+			a = a or 'open'
+		elseif table.binaryfind(openeddoorsids, id) then
+			doorId = id
+			doorType = 'open'
 			a = a or 'close'
+		end
+
+		if doorId ~= 0 then
+			break
 		end
 	end
 
 	-- if a door wasn't found on the position it could mean the door id is not on the closeddoors table yet...
-	if doorid == 0 then
-		printerror('Unable to find a door at position x:'..x..', y:'..y..', y:'..z..'.')
+	if doorId == 0 then
+		printerror(('Unable to find a door at position x: %d, y: %d, z: %d.'):format(x,y,z))
+
 		return false
 	end
 
 	-- if doortype == a, means the door is already on the desired state...
-	if doortype == a then
+	if doorType == a then
 		return true
 	end
 
+	local topUseId = topuseitem(x,y,z).id 
 	if a == 'open' then
 		while true do
-			topid = topuseitem(x,y,z).id
-			if topid == doorid or topid == 2179 or topid == 2177 then
-				useitem(topid,ground(x,y,z)) waitping()
+			if topUseId == doorId or topUseId == 2179 or topUseId == 2177 then
+				useitem(topUseId, ground(x,y,z)) waitping()
 			else
 				return true
 			end
+
+			topUseId = topuseitem(x,y,z).id
 		end
 	elseif a == 'close' then
 		while true do
-			topid = topuseitem(x,y,z).id
-			if topid == doorid then
-				useitem(topid, ground(x,y,z)) waitping()
-			elseif not iteminfo(topid).isunmove then
+			if topUseId == doorId then
+				useitem(topUseId, ground(x,y,z)) waitping()
+			elseif not iteminfo(topUseId).isunmove then
 				local dir, dirx, diry = wheretomoveitem(x,y,z)
-				moveitems(topmoveitem(x,y,z).id,ground(x+dirx,y+diry,z),ground(x,y,z),100) waitping()
+				moveitems(topmoveitem(x,y,z).id, ground(x + dirx, y + diry, z), ground(x,y,z), 100) waitping()
 			else
 				return true
 			end
+
+			topUseId = topuseitem(x,y,z).id
 		end
 	end
 end
