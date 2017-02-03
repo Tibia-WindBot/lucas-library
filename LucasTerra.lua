@@ -3533,6 +3533,7 @@ function fishinice(x, y, z, pickid) -- by botterxxx
 	return false
 end
 
+
 -- @param	x		The x-axis position
 
 -- @name	getdirpos
