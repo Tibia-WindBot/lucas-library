@@ -2218,7 +2218,7 @@ function breakspidersilk(x,y,z, walls)
 			v = v+1
 		end
 		if v <= #walls then
-			local id = topitem(x,y,z).id
+			local id = topuseonitem(x,y,z).id
 			while id ~= walls[v][2] do
 				if id == walls[v][1] then
 					if iscreatureontile(x,y,z) then
@@ -2234,7 +2234,7 @@ function breakspidersilk(x,y,z, walls)
 				else
 					return false
 				end
-				id = topitem(x,y,z).id
+				id = topuseonitem(x,y,z).id
 			end
 			return true
 		end
