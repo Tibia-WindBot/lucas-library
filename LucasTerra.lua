@@ -2130,53 +2130,121 @@ function uselever(x,y,z,id)
 	return false
 end
 
--- @name	breakdworcwall
--- @desc		Breaks any dworc wall on the given coordinates.
--- @param	x	The x-axis position.
--- @param	y	The y-axis position.
--- @param	z	The z-axis position.
--- @param	walls The walls ID's. (optional)
+-- @name	__breakwall
+-- @desc		Generic function used to break things using items (spider silk with weapons, high grasses with machetes, etc.)
+-- @param	x	  				The x-axis position.
+-- @param	y	  				The y-axis position.
+-- @param	z	  				The z-axis position.
+-- @param	walls 				The walls' ids (see breakspidersilk(...)'s code)
+-- @param   preferredweapons 	A list with the preferred weapons to use here
+-- @param   useanymeleeweapon	Whether or not to allow the use of any melee weapon (disallowed in cutgrass(...))
 -- @returns boolean
-
-function breakdworcwall(x,y,z, walls)
-	x,y,z = x or $wptx, y or $wpty, z or $wptz
-	walls = walls or {{2295, 3146}, {2296, 3145}}
-	local sneakies = {9594, 9596, 9598}
-	local weaponlocation,weaponid = findweapontouse()
-	if clientitemhotkey(weaponid,'crosshair') ~= 'not found' then
-		weaponlocation = ''
-	end
-	if weaponid == 0 then
+local function __breakwall(x, y, z, walls, preferredweapons, useanymeleeweapon)
+	x, y, z = x or $wptx, y or $wpty, z or $wptz
+	if not walls then
+		printerror('Parameter \'walls\' not specified to function __breakwall')
 		return false
 	end
-	reachlocation(x,y,z)
-	if x and y and z and math.abs($posx-x) <= 7 and math.abs($posy-y) <= 5 and $posz == z and ($posx ~= x or $posy ~= y) then
-		local v = 1
-		while v <= #walls and not isitemontile(walls[v][1],x,y,z) do
-			v = v+1
-		end
-		if v <= #walls then
-			local id = topitem(x,y,z).id
-			while id ~= walls[v][2] do
-				if id == walls[v][1] then
-					if iscreatureontile(x,y,z) then
-						local dir, dirx, diry = wheretomoveitem(x,y,z,99)
-						moveitems(99,ground(x+dirx,y+diry,z),ground(x,y,z),100) wait(1400,1600)
-					elseif clientitemhotkey(weaponid,'crosshair') == 'not found' and itemcount(weaponid) == 0 then
-						printerror('Weapon not found.')
-						return false
-					end
-					useitemon(weaponid,id,ground(x,y,z),weaponlocation) wait(900,1100)
-				elseif not itemproperty(id,ITEM_NOTMOVEABLE) then
-					moveitems(id,ground($posx,$posy,$posz),ground(x,y,z),100) waitping(1,1.3)
-				else
-					return false
+	
+	if z ~= $posz then
+		printerror('__breakwall(...) can not be called on a floor other than your character\'s floor')
+	end
+	
+	local function hashotkeyforitem(itemid)
+		return ($fasthotkeys or clientitemhotkey(itemid, 'crosshair') ~= 'not found' or ($attacked.id == 0 and clientitemhotkey(itemid, 'target') ~= 'not found'))
+	end
+	
+	-- for some walls there's a preferred weapon that breaks it instantly
+	local weaponid, weaponlocation = 0, ''
+	if type(preferredweapons) == 'table' then
+		for _, weapon in ipairs(preferredweapons) do
+			if ($hasservercount and servercount(weapon) > 0 and hashotkeyforitem(itemid)) or itemcount(weapon) > 0 then
+				weaponid = weapon
+				if $rhand.id == weapon then
+					weaponlocation = 'rhand'
+				elseif $lhand.id == weapon then
+					weaponlocation = 'lhand'
 				end
-				id = topitem(x,y,z).id
 			end
-			return true
 		end
 	end
+	
+	-- preferred weapon not found, use any weapon it can find
+	-- cutgrass(...) won't allow using any weapons, because only machetes may be used
+	if useanymeleeweapon then
+		weaponlocation, weaponid = findweapontouse()
+	end
+	
+	-- weapon not found
+	if weaponid == 0 then
+		printerror('Weapon not found')
+		return false
+	end
+
+	-- prefer hotkeys over 'rhand' or 'lhand'
+	if hashotkeyforitem(weaponid) then
+		weaponlocation = ''
+	end
+	
+	reachlocation(x, y, z)
+	if tilehasinfo(x, y, z) then
+		local tileinfo = gettile(x, y, z)
+		
+		-- find what kind of wall we're trying to break
+		local wall = nil
+		for _, _wall in ipairs(walls) do
+			if isitemontile(_wall.fullwall, x, y, z) then
+				wall = _wall
+				break
+			end
+		end
+		
+		if tileinfo.itemcount == 10 then
+			-- wall is hidden under trash, lets move any items above it
+			wall = {fullwall = 0, brokenwall = 0}
+			
+			moveto(x, y, z) -- try moving at the location, maybe the wall is already broken but hidden by trash (unlikely, but who knows)
+			if ($posx == x and $posy == y) then
+				return true
+			end
+		end
+		
+		-- wall already broken
+		if not wall then
+			return true
+		end
+		
+		while wall.fullwall == 0 or isitemontile(wall.fullwall, x, y, z) do
+			local topid = topuseonitem(x, y, z).id
+			if topid == wall.fullwall then
+				-- break wall
+				useitemon(weaponid, topid, ground(x, y, z), weaponlocation) wait(300, 500)
+			else
+				-- there's something on top of the wall
+				topid = topmoveitem(x, y, z).id
+				if topid == 99 or not iteminfo(topid).isunmove then -- move creature or item
+					local dir, dirx, diry = wheretomoveitem(x, y, z, topid)
+					if dir == '' then
+						-- we don't have anywhere to move this item to :(
+						return false
+					end
+					
+					moveitems(topid, ground(x + dirx, y + diry, z), ground(x, y, z), 100) waitping(1, 1.3)
+				else
+					-- item unmoveable? fire field? poison field?
+					return false
+				end
+			end
+			
+			if wall.fullwall == 0 and tileinfo.itemcount < 10 then
+				-- wall should be visible already... restart function
+				return __breakwall(x, y, z, walls, preferredweapons, useanymeleeweapon)
+			end
+		end
+		
+		return true
+	end
+	
 	return false
 end
 
@@ -2187,127 +2255,32 @@ end
 -- @param	z	The z-axis position.
 -- @param	walls The walls ID's. (optional)
 -- @returns boolean
-
-function breakspidersilk(x,y,z, walls)
-	x,y,z = x or $wptx, y or $wpty, z or $wptz
-	walls = walls or {{182, 188}, {183, 189}}
-	local weaponid,weaponlocation = 5467
-	if itemcount(5467) > 0 then
-		if clientitemhotkey(weaponid,'crosshair') == 'not found' then
-			if $rhand.id == weaponid then
-				weaponlocation = 'rhand'
-			elseif $lhand.id == weaponid then
-				weaponlocation = 'lhand'
-			else
-				weaponlocation = ''
-			end
-		end
-	else
-		weaponlocation,weaponid = findweapontouse()
-		if clientitemhotkey(weaponid,'crosshair') ~= 'not found' then
-			weaponlocation = ''
-		end
-	end
-	if weaponid == 0 then
-		return false
-	end
-	reachlocation(x,y,z)
-	if x and y and z and math.abs($posx-x) <= 7 and math.abs($posy-y) <= 5 and $posz == z and ($posx ~= x or $posy ~= y) then
-		local v = 1
-		while v <= #walls and not isitemontile(walls[v][1],x,y,z) do
-			v = v+1
-		end
-		if v <= #walls then
-			local id = topitem(x,y,z).id
-			while id ~= walls[v][2] do
-				if id == walls[v][1] then
-					if iscreatureontile(x,y,z) then
-						local dir, dirx, diry = wheretomoveitem(x,y,z,99)
-						moveitems(99,ground(x+dirx,y+diry,z),ground(x,y,z),100) wait(1400,1600)
-					elseif clientitemhotkey(weaponid,'crosshair') == 'not found' and itemcount(weaponid) == 0 then
-						printerror('Weapon not found.')
-						return false
-					end
-					useitemon(weaponid,id,ground(x,y,z),weaponlocation) wait(900,1100)
-				elseif not itemproperty(id,ITEM_NOTMOVEABLE) then
-					moveitems(id,ground($posx,$posy,$posz),ground(x,y,z),100) waitping(1,1.3)
-				else
-					return false
-				end
-				id = topitem(x,y,z).id
-			end
-			return true
-		end
-	end
-	return false
+function breakspidersilk(x, y, z, walls)
+	-- preferredweapon: firebug
+	return __breakwall(x, y, z, walls or {{fullwall = 182, brokenwall = 188}, {fullwall = 183, brokenwall = 189}}, {5467}, true)
 end
 
 -- @name	breakdworcwall
+-- @desc		Breaks any dworc wall on the given coordinates.
+-- @param	x	The x-axis position.
+-- @param	y	The y-axis position.
+-- @param	z	The z-axis position.
+-- @param	walls The walls ID's. (optional)
+-- @returns boolean
+function breakdworcwall(x, y, z, walls)
+	-- preferredweapon: sneakies
+	return __breakwall(x, y, z, walls or {{fullwall = 2295, brokenwall = 3146}, {fullwall = 2296, brokenwall = 3145}}, {9594, 9596, 9598}, true)
+end
+
+-- @name	cutgrass
 -- @desc		Cuts high grasses on the given coordinates.
 -- @param	x	The x-axis position.
 -- @param	y	The y-axis position.
 -- @param	z	The z-axis position.
 -- @returns boolean
-
-function cutgrass(x,y,z)
-	x,y,z = x or $wptx, y or $wpty, z or $wptz
-	local grasses = {{3702, 3701},{3696, 3695}}
-	local weaponid,weaponlocation = false
-	for i,j in ipairs(machetes) do
-		if itemcount(j) > 0 then
-			weaponid = j
-			break
-		end
-	end
-	if not macheteid then
-		for i,j in ipairs(machetes) do
-			if clientitemhotkey(j) ~= 'not found' then
-				weaponid = j
-				break
-			end
-		end
-	end
-	if not weaponlocation then
-		if $rhand.id == weaponid then
-			weaponlocation = 'rhand'
-		elseif $lhand.id == weaponid then
-			weaponlocation = 'lhand'
-		else
-			weaponlocation = ''
-		end
-	end
-	if not weaponid then
-		return false
-	end
-	reachlocation(x,y,z)
-	if x and y and z and math.abs($posx-x) <= 7 and math.abs($posy-y) <= 5 and $posz == z and ($posx ~= x or $posy ~= y) then
-		local v = 1
-		while v <= #grasses and not isitemontile(grasses[v][1],x,y,z) do
-			v = v+1
-		end
-		if v <= #grasses then
-			local id = topitem(x,y,z).id
-			while id ~= grasses[v][2] do
-				if id == grasses[v][1] then
-					if iscreatureontile(x,y,z) then
-						local dir, dirx, diry = wheretomoveitem(x,y,z,99)
-						moveitems(99,ground(x+dirx,y+diry,z),ground(x,y,z),100) wait(1400,1600)
-					elseif clientitemhotkey(weaponid,'crosshair') == 'not found' and itemcount(weaponid) == 0 then
-						printerror('Machete not found.')
-						return false
-					end
-					useitemon(weaponid,id,ground(x,y,z),weaponlocation) wait(900,1100)
-				elseif not itemproperty(id,ITEM_NOTMOVEABLE) then
-					moveitems(id,ground($posx,$posy,$posz),ground(x,y,z),100) waitping(1,1.3)
-				else
-					return false
-				end
-				id = topitem(x,y,z).id
-			end
-			return true
-		end
-	end
-	return false
+function cutgrass(x, y, z, walls)
+	-- preferredweapon: machetes, then sneakies
+	return __breakwall(x, y, z, walls or {{fullwall = 3702, brokenwall = 3701}, {fullwall = 3696, brokenwall = 3695}}, {3308, 3330, 9594, 9596, 9598}, false)
 end
 
 -- @name	itemproperties
