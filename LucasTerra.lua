@@ -7048,4 +7048,115 @@ function usetrainer()
 	return false
 end
 
+-- @name 	depotboxtransfer
+-- @desc 	Deposits all the items from a given backpack inside selected depot boxes.
+-- @param 	fromBp				The backpack to move items from
+-- @param	cat¹, box¹, cat², box², ...	
+-- @returns boolean
+function depotboxtransfer(fromBp, ...)
+	local args = {...}
+
+	local function getLootingItem(id)
+		foreach lootingitem i do
+			if i.id == id then
+				return i
+			end
+		end
+
+		return nil
+	end	
+
+	local function getDepotBoxId(lootInfo)
+		for i = 1, #args, 2 do
+			if args[i] == lootInfo.category then
+				local index = tonumber(args[i + 1] or getlootingdestination(args[i + 1]))
+
+				if index then
+					return 22796 + math.min(17, index)
+				end
+			end
+		end
+
+		return 0
+	end
+
+	local function getBpId(destName)
+		local dest = getlootingdestination(destName)
+		if dest == '' then
+			return itemid(destName)
+		end
+
+		return itemid(dest)
+	end
+
+	local function isDepotOpen()
+		for i = 0, 15 do
+			local cont = getcontainer(i)
+
+			if cont.name:lower() == 'depot chest' and cont.isopen then
+				return true
+			end
+		end
+
+		return false
+	end
+
+
+	local fromBpId = getBpId(fromBp)
+
+	if fromBpId == $back.id then
+		printerror('You can\'t use your main backpack\'s ID as a looting destination. Please change your backpack type.')
+
+		return false
+	elseif fromBpId == 0 then
+		printerror(('The looting destination \'%s\' does not contain a valid backpack name.'):format(fromBp))
+
+		return false
+	elseif not isDepotOpen() then
+		printerror('Unable to find a depot chest. Open depot chest before depositing.')
+
+		return false
+	end
+
+	for i = 0, 15 do
+		local cont = getcontainer(i)
+
+		if cont.isopen and cont.itemid == fromBpId then
+			while cont.itemid == fromBpId and cont.isopen do
+				if not isDepotOpen() then
+					return false
+				end
+
+				local indexItemToMove = 1
+				while indexItemToMove <= cont.itemcount do
+					local idToMove = cont.items[indexItemToMove].id
+					local lootInfo = getLootingItem(idToMove)
+
+					if lootInfo then
+						local depotBoxId = getDepotBoxId(lootInfo)
+
+						if depotBoxId ~= 0 then
+							setlifetime(60000)
+							moveitemsonto(idToMove, depotBoxId, 1, 'depot chest', tostring(i), 100) waitping()
+
+							indexItemToMove = indexItemToMove - 1
+						end
+					end
+
+					indexItemToMove = indexItemToMove + 1
+				end
+
+				if cont.hashigher then
+					higherwindows(i, true) waitping()
+				end
+			end
+			repeat
+				openitem(fromBpId, i) waitping()
+			until cont.itemid == fromBpId or not cont.isopen or itemcount(fromBpId, i) == 0
+
+			return true
+		end
+	end
+end
+
 printf('Lucas Terra Library Version: %s', LIBS.LUCAS)
