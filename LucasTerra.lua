@@ -5671,52 +5671,29 @@ function resupply(category)
 end
 
 -- @name	depositerbank
--- @desc		Deal with talk operations to deposit and withdraw the money needed for supplies.
--- @param	category		The supply category to check. (optional)
--- @param	extragold		The an extra amount of gold to withdraw. (optional)
--- @param   logoutifnocash	If set to true, it will make your character logout if you have no cash in the bank. (optional)
+-- @desc		Deal with talk operations to deposit and checks the money needed for supplies.
+-- @param	supplyCategory	The supply category to check. (optional)
+-- @param	extraGold		The an extra amount of gold to count. (optional)
+-- @param   logoutIfNoCash	If set to true / yes, it will make your character logout if you have not enough cash in the bank. (optional)
+-- @param   countMoneyOnYou If set to true / yes, bot will consider money that you got in your inventory. (optional)
 -- @returns	boolean
 
-function depositerbank(supplycategory, extragold, logoutifnocash)
-	extragold = extragold or 0
+function depositerbank(supplyCategory, extraGold, logoutIfNoCash, countMoneyOnYou)
+	extraGold = extraGold or 0
+	logoutIfNoCash = tobool(logoutIfNoCash)
+	countMoneyOnYou = tobool(countMoneyOnYou)
 
-	local npccount = 0
-	foreach creature m 'ns' do
-		if m.dist <= 3 then
-			npccount = npccount + 1
-		end
-	end
-	
-	if npccount == 0 then
-		printerror('Unable to find a NPC close to you')
-		return
-	end
-	
-	local currentnpcmsg = $lastnpcmsg
-	local tries = 0
-	local maxtries = math.random(3, 5)
-	
-	if not ischannel('NPCs') then
-		say('hi')
-	else
-		npcsay('hi')
-	end
-	local t = $timems
-	while $timems - t <= 2500 and currentnpcmsg == $lastnpcmsg do wait(100) end
+	local talkSuccess = npctalk('hi', 'deposit all', 'yes', 'balance')
+	if not talkSuccess then
+		printerror('Unable to talk to a NPC.')
 
-	-- deposits money
-	npcsay('deposit all') wait(500,1000)
-	npcsay('yes') wait(500,1000)
-
-	-- check balance
-	repeat
-		npcsay('balance')
-	until waitmessage('', 'Your account balance is %d+', 2000, true, MSG_NPC)
+		return false
+	end
 
 	-- withdraw needed money
-	local towithdraw = moneytowithdraw(supplycategory) + extragold
-	if $balance < towithdraw then
-		if logoutifnocash then
+	local toWithdraw = moneytowithdraw(supplyCategory) + extraGold
+	if $balance + tern(countMoneyOnYou, $money, 0) < toWithdraw then
+		if logoutIfNoCash then
 			printerror('Your character has logged out because you don\'t have enough money in bank.')
 			xlog(true)
 
@@ -5724,7 +5701,10 @@ function depositerbank(supplycategory, extragold, logoutifnocash)
 		end
 
 		playsoundflash('monster.wav')
+		return false
 	end
+
+	return true
 end
 
 -- @name	depotindextoid
