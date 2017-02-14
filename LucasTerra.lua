@@ -1994,54 +1994,42 @@ end
 -- @param	holes The holes ID's. (optional)
 -- @returns boolean
 
-function openhole(x,y,z,holes)
+function openhole(x,y,z, holes)
 	x,y,z = x or $wptx, y or $wpty, z or $wptz
-	holes = holes or {{593,594}, {606, 607}, {608, 609}, {867, 868}}
-	local shovelid = false
-	for i,j in ipairs(shovels) do
-		if itemcount(j) > 0 then
-			shovelid = j
-			break
-		end
+	holes = holes or {{593, 594}, {606, 607}, {608, 609}, {867, 868}}
+
+	local shovelId = gettool('shovel')
+	if shovelId == 0 then
+		printerror('Couldn\'t find shovel in your backpacks.')
+
+		return false
+	elseif ((not $fasthotkeys and clientitemhotkey(shovelId, 'crosshair') == 'not found') and itemcount(shovelId) == 0) then
+		printerror('Couldn\'t find shovel on your hotkeys.')
+		
+		return false
 	end
-	if not shovelid then
-		for i,j in ipairs(shovels) do
-			if clientitemhotkey(j) ~= 'not found' then
-				shovelid = j
-				break
-			end
-		end
-	end
-	local k = ''
-	if not shovelid then return false end
+
 	reachlocation(x,y,z)
-	if x and y and z and math.abs($posx-x) <= 7 and math.abs($posy-y) <= 5 and $posz == z and ($posx ~= x or $posy ~= y) then
+	if x and y and z and math.abs($posx - x) <= 7 and math.abs($posy - y) <= 5 and $posz == z and ($posx ~= x or $posy ~= y) then
 		local v = 1
-		while v <= #holes and not isitemontile(holes[v][1],x,y,z) do
-			v = v+1
+
+		while v <= #holes and not isitemontile(holes[v][1], x,y,z) do
+			v = v + 1
 		end
+
 		if v <= #holes then
-			local id = topitem(x,y,z).id
-			while id ~= holes[v][2] do
-				if id == holes[v][1] then
-					if iscreatureontile(x,y,z) then
-						local dir, dirx, diry = wheretomoveitem(x,y,z,99)
-						moveitems(99,ground(x+dirx,y+diry,z),ground(x,y,z),100) wait(1400,1600)
-					elseif clientitemhotkey(shovelid,'crosshair') == 'not found' and itemcount(shovelid) == 0 then
-						printerror(shoveltype.. ' not found.')
-						return false
-					end
-					useitemon(shovelid,id,ground(x,y,z),k) wait(900,1100)
-				elseif not itemproperty(id,ITEM_NOTMOVEABLE) then
-					moveitems(id,ground($posx,$posy,$posz),ground(x,y,z),100) waitping(1,1.3)
-				else
-					return false
-				end
-				id = topitem(x,y,z).id
+			local id = topuseitem(x,y,z).id
+
+			while id == holes[v][1] do
+				useitemon(shovelId, id, ground(x,y,z)) waitping(1, 2)
+
+				id = topuseitem(x,y,z).id
 			end
+
 			return true
 		end
 	end
+
 	return false
 end
 
