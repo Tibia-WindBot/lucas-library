@@ -7048,4 +7048,46 @@ function usetrainer()
 	return false
 end
 
+
+SetupEventManager = { __class = 'SetupEventManager' }
+SetupEventManagerMT = { __index = SetupEventManager }
+
+-- @name 	SetupEventManager.new
+-- @desc 	Creates new instance responsible for handling setup events.
+-- @returns SetupEventManager
+function SetupEventManager.new()
+	local newObj = {
+		events = {}
+	}
+
+	setmetatable(newObj, SetupEventManagerMT)
+	return newObj
+end
+
+-- @name 	SetupEventManager:register
+-- @desc 	Registers new event handler for a specified user options item with name 'id'. If the event is triggered it will execute given callback.
+-- @param 	id					The user option item name.
+-- @param	callback 			Function to be called.
+-- @returns callback
+function SetupEventManager:register(id, callback)
+	self.events[id] = callback
+
+	local opt = getuseroption(id)
+	if opt then
+		return callback(opt)
+	end
+end
+
+-- @name 	SetupEventManager:handle
+-- @desc 	Handles event given.
+-- @param   e 				An event to be handled.
+-- @returns callback
+function SetupEventManager:handle(e)
+	for id, callback in pairs(self.events) do
+		if e.name == id then
+			return callback(e.value)
+		end
+	end
+end
+
 printf('Lucas Terra Library Version: %s', LIBS.LUCAS)
